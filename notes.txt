@@ -1,0 +1,40 @@
+https://web3py.readthedocs.io/en/stable/web3.eth.html
+###############################################
+# Eth.sendTransaction(transaction)
+- Delegates to eth_sendTransaction RPC Method
+- Signs and sends the given transaction
+###############################################
+
+The transaction parameter should be a dictionary with the following fields.
+
+from: bytes or text, hex address or ENS name - (optional, default: web3.eth.defaultAccount) The address the transaction is send from.
+to: bytes or text, hex address or ENS name - (optional when creating new contract) The address the transaction is directed to.
+gas: integer - (optional, default: 90000) Integer of the gas provided for the transaction execution. It will return unused gas.
+gasPrice: integer - (optional, default: To-Be-Determined) Integer of the gasPrice used for each paid gas
+value: integer - (optional) Integer of the value send with this transaction
+data: bytes or text - The compiled code of a contract OR the hash of the invoked method signature and encoded parameters. For details see Ethereum Contract ABI.
+nonce: integer - (optional) Integer of a nonce. This allows to overwrite your own pending transactions that use the same nonce.
+If the transaction specifies a data value but does not specify gas then the gas value will be populated using the estimateGas() function with an additional buffer of 100000 gas up to the gasLimit of the latest block. In the event that the value returned by estimateGas() method is greater than the gasLimit a ValueError will be raised.
+
+>>> web3.eth.sendTransaction({'to': '0xd3cda913deb6f67967b99d67acdfa1712c293601', 'from': web3.eth.coinbase, 'value': 12345})
+'0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331'
+
+
+###############################################
+# Eth.sendRawTransaction(raw_transaction)
+- Delegates to eth_sendRawTransaction RPC Method
+- Sends a signed and serialized transaction. Returns the transaction hash.
+###############################################
+
+>>> signed_txn = w3.eth.account.signTransaction(dict(
+    nonce=w3.eth.getTransactionCount(w3.eth.coinbase),
+    gasPrice=w3.eth.gasPrice,
+    gas=100000,
+    to='0xd3cda913deb6f67967b99d67acdfa1712c293601',
+    value=12345,
+    data=b'',
+  ),
+  private_key_for_senders_account,
+)
+>>> w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+'0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331'

@@ -1,0 +1,151 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="jumbotron container fluid">
+    
+    <h1>Giddy up!</h1>
+    
+    <div class="container fluid">
+      <div class="row">
+        <div class="col-md-4">
+            <p>CWBY (Cowboy) Coin is not just a crypto token. CWBY Coin is a lifestyle.</p>
+        </div>
+        <div class="col-md-2">
+          <!--SPACER-->
+        </div>
+        <div class="col-md-6">
+          <form action="/charge" method="post">
+            <article>
+                <label>
+                  <p>Buy CWBY right here!</p>
+                </label>
+              </article>
+            <div class="form-group">
+                <label for="amountInput">Amount (CWBY)</label>
+                <div class="row">
+                  <div class="col-xs-8">
+                    <input type="number" class="form-control" id="amountInput" placeholder="100" onchange="setAmount()">
+                  </div>
+                  <div class="col-xs-1">
+                    <strong>Price: </strong>
+                    <div id="priceHeader"></div>
+                  </div>
+                </div>
+            </div>
+            <div class="form-group">
+              <label for="addressInput">ETH Address</label>
+              <input type="text" class="form-control" id="addressInput" placeholder="0xcb39f9322b21150833303453ec20aabef0817f90">
+            </div>
+            <button type="button" class="btn btn-success btn-block" id="paymentButton">Purchase</button>
+
+            <script>
+              var _amount = 0;
+              var price;
+              var _price;
+
+              // get price from API
+              var http = new XMLHttpRequest();
+              http.onreadystatechange = function(){
+                if (this.readyState == 4 && this.status == 200){
+                  price = http.responseText;
+                  _price = parseInt(price, 10); // member -- price is in cents
+                  document.getElementById("priceHeader").innerHTML = "$" + (_price/100).toFixed(2) + "/CWBY";
+                }
+              }
+              http.open("GET", "/price", true);
+              http.send();
+
+              // listener to store value for Stripe dialog
+              function setAmount(){
+                var box = document.getElementById("amountInput");
+                _amount = parseInt(box.value, 10);
+                console.log(_amount);
+              }
+              function getAmount(){
+                if (_amount > 0){
+                  return _amount;
+                }
+                else {
+                  return 100;
+                }
+              }
+            </script>
+
+            <script src="https://checkout.stripe.com/checkout.js"></script>
+            
+            <script>
+              var handler = StripeCheckout.configure({
+                key: "{{ key }}",
+                image: 'https://stripe.com/img/documentation/checkout/marketplace.png',
+                locale: 'auto',
+                token: function(token){ // "AKA token callback"
+                  // access token with `token.id`
+                  // get token ID for server-side code usage
+                  console.log(token.id);
+                  
+                  // redirect to charge page: confirmation of sale
+                  $.redirect('/charge', 
+                    {'stripeToken': token.id, 
+                    'amount': getAmount()*_price, 
+                    'dollars': (getAmount()*_price/100).toFixed(2), 
+                    'coins': getAmount(),
+                    'address': '0xcb39f9322b21150833303453ec20aabef0817f90' // my address for testing
+                  });
+                }
+              });
+
+              document.getElementById('paymentButton').addEventListener('click', function(e){
+                // open Checkout
+                handler.open({
+                  name: 'CWBY Coin',
+                  description: 'Buy ' + getAmount() + ' CWBY coins',
+                  zipCode: true,
+                  amount: getAmount() * _price // don't forget; amount is # of CWBY COINS
+                });
+                e.preventDefault();
+              });
+
+              // close checkout on page navigation
+              window.addEventListener('popstate', function(){
+                handler.close();
+              });
+              
+            </script>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="alert alert-info">
+      Website under development... Stay posted!
+      <div class="progress">
+        <div class="progress-bar" role="progressbar" aria-valuenow="75"
+        aria-valuemin="0" aria-valuemax="100" style="width:75%">
+          Rigging up ETH smart contract...
+      </div>
+    </div>
+    <div class="alert alert-warning">
+      To test a credit card transaction, use Card: 4242-4242-4242-4242 Expire: 01/21 CVV: 123
+    </div>
+  </div>
+
+
+  <!-- CDN-based web3.js -->
+  <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+  <!-- handcrafted web3 interface -->
+  <script src="js/web3io.js"></script>
+  <script>
+    // INITIALIZE WEB3
+    window.addEventListener('load', function(){
+    // check for web3 injection
+    if (typeof web3 !== 'undefined'){
+      startApp(web3);
+    }
+    else{
+      // get user to install metamask
+      window.alert("web3 is undefined. Please install Metamask.");
+    }
+    });
+  </script>
+{% endblock %}

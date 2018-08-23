@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="jumbotron container">
+        <h1 class="display-4">Yeee-haw!</h1>
+        <p class="lead">You bought <strong>{{coins}}</strong> CWBY coins for <strong>${{dollars}}!</strong></p>
+        <hr class="my-4">
+        <div>We're sending your tokens to your ETH address: 
+            <a href="http://etherscan.io/address/{{address}}">{{address}}</a>
+        </div>
+        <a href="http://etherscan.io">View your transaction</a>
+        
+    </div>
+{% endblock %}

@@ -1,0 +1,5 @@
+flask
+stripe
+web3
+eth-testrpc
+py-solc
