@@ -5,10 +5,14 @@ RUN apt-get install -y software-properties-common && add-apt-repository ppa:ethe
 RUN pip3 install --upgrade setuptools
 
 RUN mkdir -p /src/app/
-COPY . /src/app
 WORKDIR /src/app
 
+# copy only requirements.txt to avoid re-building pip dependency layer on every build...
+ADD ./requirements.txt /src/app/
 RUN pip3 install -r requirements.txt
+
+# ...then copy the rest (app files need frequent rebuilding)
+COPY . /src/app
 
 EXPOSE 5000
 

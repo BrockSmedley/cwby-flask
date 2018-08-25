@@ -1,6 +1,10 @@
-import os
+import os, sys
 from flask import Flask, render_template, request, redirect, send_from_directory
 import stripe
+
+import ethio
+
+SUPPORT_EMAIL = "damonsmedley12@gmail.com"
 
 ### SETUP
 stripe_keys = {
@@ -33,6 +37,7 @@ def charge():
             email = 'brocksmedley@gmail.com',
             source = request.form['stripeToken']
         )
+        #print(customer, file=sys.stderr)
 
         charge = stripe.Charge.create(
             customer = customer.id,
@@ -40,7 +45,24 @@ def charge():
             currency = 'usd',
             description = 'CWBY web payment'
         )
-        return render_template('charge.html', amount=amount, dollars=dollars, coins=coins, address=address)
+        #print(charge, file=sys.stderr)
+        
+        if (charge['outcome']['network_status'] != "approved_by_network"):
+            # transaction error
+            return render_template('error.html', charge=charge, customer=customer, supportEmail=SUPPORT_EMAIL)
+        else:
+            # payment processed successfully
+            # disburse coins
+            try:
+                print(ethio.getProvider(), file=sys.stderr)
+                print(ethio.orderCoins(coins, address), file=sys.stderr)
+                #print(ethio.buildTestContract(), file=sys.stderr)
+                #print(ethio.getenode(), file=sys.stderr)
+            except Exception as e:
+                print("something went wrong with the ETH transaction\n%s" % str(e), file=sys.stderr)
+
+            # return confirmation page
+            return render_template('charge.html', amount=amount, dollars=dollars, coins=coins, address=address)
 
     except Exception as identifier:
         return redirect("/#/", code=302)
@@ -56,5 +78,12 @@ def price():
 def js(path):
     return send_from_directory('scripts', path)
 
+
+@app.route('/support')
+def support():
+    return render_template('support.html', supportEmail=SUPPORT_EMAIL)
+
+
+# RUN THAT SHIT
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -6,24 +6,25 @@
     
     <div class="container fluid">
       <div class="row">
-        <div class="col-md-4">
-            <p>CWBY (Cowboy) Coin is not just a crypto token. CWBY Coin is a lifestyle.</p>
+        <div class="col-md-5">
+            <p>We're moving weight, and you can too.</p>
+            <p>This is not your typical crypto token.
+            It's a token of status. It's a movement. It's a lifestyle.</p>
+            <div>MORE PROMOTIONAL MATERIAL HERE</div>
+            <p>Take life by the reigns and buy some CWBY!</p>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-1">
           <!--SPACER-->
         </div>
         <div class="col-md-6">
-          <form action="/charge" method="post">
-            <article>
-                <label>
-                  <p>Buy CWBY right here!</p>
-                </label>
-              </article>
+          <form action="/charge" method="post" class="needs-validation" novalidate>
+            <h3>Buy CWBY right here!</h3>
+            <hr class="my-1">
             <div class="form-group">
                 <label for="amountInput">Amount (CWBY)</label>
                 <div class="row">
                   <div class="col-xs-8">
-                    <input type="number" class="form-control" id="amountInput" placeholder="100" onchange="setAmount()">
+                    <input type="number" class="form-control is-valid" id="amountInput" placeholder="100" onchange="setAmount()" required>
                   </div>
                   <div class="col-xs-1">
                     <strong>Price: </strong>
@@ -33,9 +34,21 @@
             </div>
             <div class="form-group">
               <label for="addressInput">ETH Address</label>
-              <input type="text" class="form-control" id="addressInput" placeholder="0xcb39f9322b21150833303453ec20aabef0817f90">
+              <input type="text" class="form-control is-valid" id="addressInput" placeholder="0xcb39f9322b21150833303453ec20aabef0817f90" required>
+              <div class="invalid-feedback">
+                You must enter your ETH address before checking out.
+              </div>
             </div>
-            <button type="button" class="btn btn-success btn-block" id="paymentButton">Purchase</button>
+            <button type="submit" class="btn btn-success btn-block" id="paymentButton">Purchase</button>
+
+            <script>
+              // Verify inputs
+              (function(){
+                  'use strict';
+                  window.addEventListener('load', function(){
+                    ////
+                })();
+            </script>
 
             <script>
               var _amount = 0;
@@ -94,6 +107,9 @@
               });
 
               document.getElementById('paymentButton').addEventListener('click', function(e){
+                // manually validate forms
+                
+
                 // open Checkout
                 handler.open({
                   name: 'CWBY Coin',

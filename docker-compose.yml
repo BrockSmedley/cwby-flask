@@ -1,6 +1,28 @@
 version: '3'
 services:
   web:
-    build: .
+    build: ./flask
     ports:
-    - "5000:5000"
+      - "5000:5000"
+    networks:
+      legacy:
+        ipv4_address: 172.70.0.2
+  parity:
+    build: ./parity
+    ports:
+      - "8180:8180"
+      - "8545:8545"
+      - "8546:8546"
+      - "30303:30303"
+      - "30303:30303/udp"
+    networks:
+      legacy:
+        ipv4_address: 172.70.0.3
+
+networks:
+  legacy:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.70.0.0/16
