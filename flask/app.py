@@ -1,5 +1,5 @@
 import os, sys
-from flask import Flask, render_template, request, redirect, send_from_directory
+from flask import Flask, render_template, request, redirect, send_from_directory, url_for
 import stripe
 
 import ethio
@@ -18,11 +18,16 @@ stripe.api_key = stripe_keys['secret_key']
 
 app = Flask(__name__, static_url_path='')
 
-
 ### APP ROUTES
 @app.route('/')
 def index():
     return render_template('index.html', key=stripe_keys['publishable_key'])
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico')
+
 
 @app.route('/charge', methods=['POST'])
 def charge():
@@ -54,10 +59,9 @@ def charge():
             # payment processed successfully
             # disburse coins
             try:
-                print(ethio.getProvider(), file=sys.stderr)
-                print(ethio.orderCoins(coins, address), file=sys.stderr)
-                #print(ethio.buildTestContract(), file=sys.stderr)
-                #print(ethio.getenode(), file=sys.stderr)
+                ethResult = ethio.orderCoins(coins, address)
+                #print(ethio.getProvider(), file=sys.stderr)
+                print(ethResult, file=sys.stderr)
             except Exception as e:
                 print("something went wrong with the ETH transaction\n%s" % str(e), file=sys.stderr)
 
