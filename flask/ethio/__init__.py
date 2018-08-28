@@ -286,11 +286,11 @@ def orderCoins(numCoins, address_receiver):
     nonce = w3.eth.getTransactionCount(API_ADDRESS)
 
     # sanity check
-    print ("Contract address: %s" % CONTRACT_ADDRESS, file=sys.stderr)
-    print ("Recipient address: %s" % RECEIVER_ADDRESS, file=sys.stderr)
-    print ("API address: %s" % API_ADDRESS, file=sys.stderr)
-    print ("Nonce: %s" % str(nonce), file=sys.stderr)
-    print ("Coins: %s" % numCoins, file=sys.stderr)
+    #print ("Contract address: %s" % CONTRACT_ADDRESS, file=sys.stderr)
+    #print ("Recipient address: %s" % RECEIVER_ADDRESS, file=sys.stderr)
+    #print ("API address: %s" % API_ADDRESS, file=sys.stderr)
+    #print ("Nonce: %s" % str(nonce), file=sys.stderr)
+    #print ("Coins: %s" % numCoins, file=sys.stderr)
 
     # convert numCoins to int
     coins = int(numCoins)
@@ -302,8 +302,8 @@ def orderCoins(numCoins, address_receiver):
     # build transaction
     tx = contract.functions.transfer(RECEIVER_ADDRESS, coins).buildTransaction(
         {'chainId': None, 
-        'gas': w3.toWei('50000','wei'), 
-        'gasPrice': w3.toWei('1', 'wei'), 
+        'gas': 70000,
+        'gasPrice': 1, #w3.toWei('1', 'wei'), #TODO: use estimateGas(?)
         'value': w3.toHex(w3.toWei('0','ether')),
         'from':API_ADDRESS, 'nonce': nonce, 
         }
