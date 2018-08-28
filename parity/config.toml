@@ -7,7 +7,7 @@ chain = "dev"
 # Parity continously syncs the chain
 mode = "active"
 # Blockchain and settings will be stored in ~/.local/share/io.parity.ethereum.
-base_path = "~/.local/share/io.parity.ethereum"
+base_path = "/root/.local/share/io.parity.ethereum"
 
 [rpc]
 # Allows Cross-Origin Requests from domain 'all'.

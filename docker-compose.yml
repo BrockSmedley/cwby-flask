@@ -8,7 +8,10 @@ services:
       legacy:
         ipv4_address: 172.70.0.2
   parity:
+    volumes:
+      - "~/.local/share/io.parity.ethereum/docker/:/root/.local/share/io.parity.ethereum/"
     build: ./parity
+    command: ["--config", "/root/.local/share/io.parity.ethereum/config.toml"]
     ports:
       - "8180:8180"
       - "8545:8545"
