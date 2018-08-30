@@ -280,6 +280,7 @@ def orderCoins(numCoins, address_receiver, provider=None):
     # read private key from secret file
     keyfile = open('.ethkey', 'r')
     PRIVATE_KEY_API = keyfile.readline().strip('\n')
+    keyfile.close()
 
     print(w3.eth.accounts)
 

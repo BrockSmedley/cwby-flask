@@ -12,6 +12,7 @@ SUPPORT_EMAIL = "damonsmedley12@gmail.com"
 keyfile = open('.stripekeys', 'r')
 secret_key = keyfile.readline().strip('\n')
 publishable_key = keyfile.readline().strip('\n')
+keyfile.close()
 stripe_keys = {
     # TODO: Move these into system environment vars (or files)
     # os.environ['VAR_NAME']
