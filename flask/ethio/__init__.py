@@ -266,10 +266,9 @@ def abi():
     '''
 
 
-def orderCoins(numCoins, address_receiver):
+def orderCoins(numCoins, address_receiver, provider=None):
     # get web3 interface
-    #provider = getProvider("http://localhost")
-    provider = getProvider()
+    provider = getProvider(provider)
     w3 = Web3(provider)
 
     # convert receiver address to checksum address
@@ -277,7 +276,12 @@ def orderCoins(numCoins, address_receiver):
 
     # address of token
     CONTRACT_ADDRESS = '0x731a10897d267e19B34503aD902d0A29173Ba4B1'
-    PRIVATE_KEY_API = 'a5fd26e449e7068059d4e139465205963d3355ee2a9f45d9e7d4635b4524cda3'
+
+    # read private key from secret file
+    keyfile = open('.ethkey', 'r')
+    PRIVATE_KEY_API = keyfile.readline().strip('\n')
+
+    print(w3.eth.accounts)
 
     # address of API (this thing)
     API_ADDRESS = '0x85D519832Eee2ea676419F896B6E0A1e83a28CEA'
@@ -299,7 +303,6 @@ def orderCoins(numCoins, address_receiver):
     # get contract instance
     contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abi())
 
-
     # build transaction
     tx = contract.functions.transfer(RECEIVER_ADDRESS, coins).buildTransaction(
         {'chainId': None, 
@@ -313,7 +316,6 @@ def orderCoins(numCoins, address_receiver):
 
     # sign tx locally
     signed_tx = w3.eth.account.signTransaction(tx, private_key=PRIVATE_KEY_API)
-
     result = w3.eth.sendRawTransaction(signed_tx.rawTransaction)
 
     return result.hex()

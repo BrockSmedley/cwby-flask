@@ -107,3 +107,4 @@ flask/.DS_Store
 # node modules directory
 flask/static/node_modules
 flask/.stripekeys
+flask/.ethkey
