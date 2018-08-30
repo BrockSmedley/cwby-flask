@@ -4,10 +4,14 @@
         <h1 class="display-4">Yeee-haw!</h1>
         <p class="lead">You bought <strong>{{coins}}</strong> CWBY coins for <strong>${{dollars}}!</strong></p>
         <hr class="my-4">
-        <div>We're sending your tokens to your ETH address: 
-            <a href="http://etherscan.io/address/{{address}}">{{address}}</a>
-        </div>
-        <a href="http://etherscan.io">View your transaction</a>
+        {% if txid == 'none' %}
+            <div>Uh-oh. Our system encountered a rare error with your token payout. Please contact <a href="/support">Support</a> immediately.</div>
+        {% else %}
+            <div>We're sending your tokens to your ETH address: 
+                <a href="http://etherscan.io/address/{{address}}">{{address}}</a>
+            </div>
+            <a href="http://ropsten.etherscan.io/{{txid}}">Transaction Id: {{txid}}</a>
+        {% endif %}
         
     </div>
 {% endblock %}

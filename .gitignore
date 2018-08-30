@@ -103,3 +103,6 @@ venv.bak/
 # mypy
 .mypy_cache/
 flask/.DS_Store
+
+# node modules directory
+flask/static/node_modules

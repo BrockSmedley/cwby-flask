@@ -8,7 +8,7 @@ SUPPORT_EMAIL = "damonsmedley12@gmail.com"
 
 ### SETUP
 stripe_keys = {
-    # TODO: Move these into system environment vars
+    # TODO: Move these into system environment vars (or files)
     # os.environ['VAR_NAME']
     'secret_key': 'sk_test_dwKjrYs3uesCqpl7cPpWkXmY',
     'publishable_key': 'pk_test_zgMCciFrinSpuc74Mp825Asb'
@@ -39,10 +39,10 @@ def charge():
 
     try:
         customer = stripe.Customer.create(
-            email = 'brocksmedley@gmail.com',
-            source = request.form['stripeToken']
+            email = request.form['stripeEmail'],
+            source = request.form['stripeToken'],
         )
-        #print(customer, file=sys.stderr)
+        print(customer, file=sys.stderr)
 
         charge = stripe.Charge.create(
             customer = customer.id,
@@ -50,7 +50,7 @@ def charge():
             currency = 'usd',
             description = 'CWBY web payment'
         )
-        #print(charge, file=sys.stderr)
+        print(charge, file=sys.stderr)
         
         if (charge['outcome']['network_status'] != "approved_by_network"):
             # transaction error
@@ -58,18 +58,29 @@ def charge():
         else:
             # payment processed successfully
             # disburse coins
+            ethResult = ''
             try:
                 ethResult = ethio.orderCoins(coins, address)
                 #print(ethio.getProvider(), file=sys.stderr)
                 print(ethResult, file=sys.stderr)
             except Exception as e:
                 print("something went wrong with the ETH transaction\n%s" % str(e), file=sys.stderr)
+                ethResult = 'none'
 
             # return confirmation page
-            return render_template('charge.html', amount=amount, dollars=dollars, coins=coins, address=address)
+            return render_template('charge.html', amount=amount, dollars=dollars, coins=coins, address=address, txid=str(ethResult))
 
-    except Exception as identifier:
-        return redirect("/#/", code=302)
+    # except stripe.error.CardError as e:
+    #     # card was declined
+    #     return redirect("/#", code=302)
+    # except stripe.error.IdempotencyError as e:
+    #     # token was used more than once
+    #     print(e, file=sys.stderr)
+    #     return redirect("/#", code=303)
+    except Exception as e:
+        print(e, file=sys.stderr)
+        return redirect("/#", code=302)
+
 
 
 @app.route('/price')

@@ -9,6 +9,7 @@ mode = "active"
 # Blockchain and settings will be stored in ~/.local/share/io.parity.ethereum.
 base_path = "/root/.local/share/io.parity.ethereum"
 
+# TODO: tighten access restrictions to local-net hosts
 [rpc]
 # Allows Cross-Origin Requests from domain 'all'.
 cors = ["all"]
