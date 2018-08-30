@@ -1,17 +1,22 @@
 import os, sys
 from flask import Flask, render_template, request, redirect, send_from_directory, url_for
 import stripe
+import binascii
 
 import ethio
 
 SUPPORT_EMAIL = "damonsmedley12@gmail.com"
 
 ### SETUP
+# stripe keyfile must have secret key on first line and pub key on second
+keyfile = open('.stripekeys', 'r')
+secret_key = keyfile.readline().strip('\n')
+publishable_key = keyfile.readline().strip('\n')
 stripe_keys = {
     # TODO: Move these into system environment vars (or files)
     # os.environ['VAR_NAME']
-    'secret_key': 'sk_test_dwKjrYs3uesCqpl7cPpWkXmY',
-    'publishable_key': 'pk_test_zgMCciFrinSpuc74Mp825Asb'
+    'secret_key': secret_key,
+    'publishable_key': publishable_key
 }
 
 stripe.api_key = stripe_keys['secret_key']
@@ -39,7 +44,6 @@ def charge():
 
     try:
         customer = stripe.Customer.create(
-            email = request.form['stripeEmail'],
             source = request.form['stripeToken'],
         )
         print(customer, file=sys.stderr)
@@ -68,15 +72,7 @@ def charge():
                 ethResult = 'none'
 
             # return confirmation page
-            return render_template('charge.html', amount=amount, dollars=dollars, coins=coins, address=address, txid=str(ethResult))
-
-    # except stripe.error.CardError as e:
-    #     # card was declined
-    #     return redirect("/#", code=302)
-    # except stripe.error.IdempotencyError as e:
-    #     # token was used more than once
-    #     print(e, file=sys.stderr)
-    #     return redirect("/#", code=303)
+            return render_template('charge.html', amount=amount, dollars=dollars, coins=coins, address=address, txid=ethResult)
     except Exception as e:
         print(e, file=sys.stderr)
         return redirect("/#", code=302)

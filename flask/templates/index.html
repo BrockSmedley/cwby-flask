@@ -117,7 +117,7 @@
               name: 'CWBY Coin',
               description: 'Buy ' + getAmount() + ' CWBY coins',
               zipCode: true,
-              amount: getAmount() * getPrice() // don't forget; getAmount() returns # of CWBY COINS
+              amount: getAmount() * getPrice(), // don't forget; getAmount() returns # of CWBY COINS
             });
           }
         }
@@ -166,7 +166,7 @@
     var setAddress = function(){
       var box = document.getElementById("addressInput");
       _address = box.value;
-      if (!w3utils.isAddress(_address)){
+      if (!isAddress(_address)){
         console.log("Invalid address: " + _address);
       }
       else{
@@ -177,7 +177,7 @@
     var getAddress = function(){
       // get latest value just in case
       setAddress();
-      if (w3utils.isAddress(_address)){
+      if (isAddress(_address)){
         return _address;
       }
       else{
@@ -187,8 +187,7 @@
 
     var _amount = 0;
     var _address = '';
-
-    document.getElementById("priceHeader").innerHTML = "$" + (getPrice()/100).toFixed(2) + "/CWBY";
+    var isAddress;
     
     // INITIALIZE WEB3 using web3io.js
     window.addEventListener('load', function(){
@@ -200,6 +199,10 @@
         // get user to install metamask
         window.alert("web3 is undefined. Please install Metamask.");
       }
+      document.getElementById("priceHeader").innerHTML = "$" + (getPrice()/100).toFixed(2) + "/CWBY";
+
+      // make isAddress function local
+      isAddress = w3utils.isAddress;
     });
   </script>
 

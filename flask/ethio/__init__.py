@@ -1,6 +1,7 @@
 import json
 import web3
 import sys
+import time
 
 from web3 import Web3, HTTPProvider, TestRPCProvider
 from solc import compile_source
@@ -308,11 +309,11 @@ def orderCoins(numCoins, address_receiver):
         'from':API_ADDRESS, 'nonce': nonce, 
         }
     )
-    print (tx, file=sys.stderr)
+    #print (tx, file=sys.stderr)
 
     # sign tx locally
     signed_tx = w3.eth.account.signTransaction(tx, private_key=PRIVATE_KEY_API)
 
-    return w3.eth.sendRawTransaction(signed_tx.rawTransaction)
+    result = w3.eth.sendRawTransaction(signed_tx.rawTransaction)
 
-#print(buildTestContract())
+    return result.hex()
