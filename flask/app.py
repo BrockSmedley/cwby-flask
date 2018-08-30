@@ -44,9 +44,8 @@ def charge():
     address = request.form['address']
 
     try:
-        customer = stripe.Customer.create(
-            source = request.form['stripeToken'],
-        )
+        customer = stripe.Customer.create(source = request.form['stripeToken'])
+        
         print(customer, file=sys.stderr)
 
         charge = stripe.Charge.create(
