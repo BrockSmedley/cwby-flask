@@ -272,6 +272,10 @@ def abi():
 		'''
 
 
+def getContractAddress():
+    return '0x731a10897d267e19B34503aD902d0A29173Ba4B1'
+
+
 def orderCoins(numCoins, address_receiver, provider=None):
     # get web3 interface
     provider = getProvider(provider)
@@ -281,7 +285,7 @@ def orderCoins(numCoins, address_receiver, provider=None):
     RECEIVER_ADDRESS = Web3.toChecksumAddress(address_receiver.lower())
 
     # address of token
-    CONTRACT_ADDRESS = '0x731a10897d267e19B34503aD902d0A29173Ba4B1'
+    CONTRACT_ADDRESS = getContractAddress()
 
     # read private key from secret file
     keyfile = open('.ethkey', 'r')

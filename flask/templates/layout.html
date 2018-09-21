@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>CWBY Coin</title>
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
@@ -20,33 +21,52 @@
   <script src="https://cdn.rawgit.com/mgalante/jquery.redirect/master/jquery.redirect.js"></script>
   <!-- CDN-based strap boot -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='extras.css') }}">
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <!-- handcrafted web3 interface -->
   <script src="{{ url_for('static', filename='bundle.js') }}" type='text/javascript'></script>
+  <script type="text/javascript">
+    var hideOverlay = function () {
+      $(".overlay").hide();
+    };
+    var showOverlay = function () {
+      $(".overlay").show();
+    }
+    window.hideOverlay = hideOverlay;
+    window.showOverlay = showOverlay;
+  </script>
 
 </head>
+
 <body>
   <div class="page-header">
     <div class="container fluid">
-      <h1>CWBY Coin</h1>
+<a href="/" style="text-decoration: none">
+  <h1>CWBY Coin</h1>
+</a>
     </div>
     <div class="container fluid">
       <div class="row">
         <div class="col-sm-6">For those who move weight.</div>
         <div class="col-sm-6">
-    <div class="btn-group btn-group-justified">
-      <a href="/" class="btn btn-basic btn-lg">
-        <h4>Buy CWBY</h4>
-      </a>
-      <a href="#" class="btn btn-basic">About Us</a>
-      <a href="#" class="btn btn-basic">Contact</a>
-      <a href="/support" class="btn btn-basic">Support</a>
-    </div>
+          <div class="btn-group btn-group-justified">
+            <a href="/" class="btn btn-basic btn-lg">
+              <h4>Buy CWBY</h4>
+            </a>
+            <a href="/product/1" class="btn btn-basic">Product</a>
+            <a href="#" class="btn btn-basic">About Us</a>
+            <a href="#" class="btn btn-basic">Contact</a>
+            <a href="/support" class="btn btn-basic">Support</a>
+          </div>
         </div>
       </div>
     </div>
   </div>
-  {% block content %}{% endblock %}
-  <div style="color: white">Site built with love by <a style="color:white" href="http://github.com/BrockSmedley">Brock Smedley</a></div>
+  {% block content %}
+  {% endblock %}
+
+  <div style="color: white">Site built with love by <a style="color:white" href="http://github.com/BrockSmedley">Brock
+      Smedley</a></div>
 </body>
+
 </html>

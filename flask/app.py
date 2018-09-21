@@ -1,13 +1,43 @@
-import os, sys
+import os
+import sys
 from flask import Flask, render_template, request, redirect, send_from_directory, url_for
 import stripe
 import binascii
+from flask_talisman import Talisman
 
 import ethio
 
+force_https = False
 SUPPORT_EMAIL = "damonsmedley12@gmail.com"
 
-### SETUP
+csp = {
+    'default-src': [
+        "'self'",
+        'maxcdn.bootstrapcdn.com',
+        'https://checkout.stripe.com',
+        'https://q.stripe.com',
+        'ajax.googleapis.com',
+        'https://cdn.rawgit.com',
+        'ajax.googleapis.com',
+        'maxcdn.bootstrapcdn.com',
+        'https://checkout.stripe.com',
+        'https://q.stripe.com',
+        'localhost:5000/',
+        "'unsafe-inline'",
+        "'unsafe-eval'"  # change this!
+    ],
+    'style-src': [
+        '\'unsafe-inline\'',
+        '\'self\'',
+        'localhost:5000/',
+        'https://maxcdn.bootstrapcdn.com',
+    ],
+    'connect-src': [
+        '*',
+    ]
+}
+
+# SETUP
 # stripe keyfile must have secret key on first line and pub key on second
 keyfile = open('.stripekeys', 'r')
 secret_key = keyfile.readline().strip('\n')
@@ -23,8 +53,10 @@ stripe_keys = {
 stripe.api_key = stripe_keys['secret_key']
 
 app = Flask(__name__, static_url_path='')
+Talisman(app, content_security_policy=csp, force_https=force_https)
 
-### APP ROUTES
+
+# APP ROUTES
 @app.route('/')
 def index():
     return render_template('index.html', key=stripe_keys['publishable_key'])
@@ -33,6 +65,15 @@ def index():
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico')
+
+
+# product description page
+@app.route('/product/<pid>', methods=['GET'])
+def product(pid):
+    pid = pid
+    # fetch data from DB to build product page with pid
+    # add arguments for product data
+    return render_template('product.html', pid=pid, cost=12)
 
 
 @app.route('/charge', methods=['POST'])
@@ -44,18 +85,18 @@ def charge():
     address = request.form['address']
 
     try:
-        customer = stripe.Customer.create(source = request.form['stripeToken'])
-        
-        print(customer, file=sys.stderr)
+        customer = stripe.Customer.create(source=request.form['stripeToken'])
+
+        #print(customer, file=sys.stderr)
 
         charge = stripe.Charge.create(
-            customer = customer.id,
-            amount = amount,
-            currency = 'usd',
-            description = 'CWBY web payment'
+            customer=customer.id,
+            amount=amount,
+            currency='usd',
+            description='CWBY web payment'
         )
-        print(charge, file=sys.stderr)
-        
+        #print(charge, file=sys.stderr)
+
         if (charge['outcome']['network_status'] != "approved_by_network"):
             # transaction error
             return render_template('error.html', charge=charge, customer=customer, supportEmail=SUPPORT_EMAIL)
@@ -66,9 +107,10 @@ def charge():
             try:
                 ethResult = ethio.orderCoins(coins, address)
                 #print(ethio.getProvider(), file=sys.stderr)
-                print(ethResult, file=sys.stderr)
+                #print(ethResult, file=sys.stderr)
             except Exception as e:
-                print("something went wrong with the ETH transaction\n%s" % str(e), file=sys.stderr)
+                print("something went wrong with the ETH transaction\n%s" %
+                      str(e), file=sys.stderr)
                 ethResult = 'none'
 
             # return confirmation page
@@ -76,7 +118,6 @@ def charge():
     except Exception as e:
         print(e, file=sys.stderr)
         return redirect("/#", code=302)
-
 
 
 @app.route('/price')

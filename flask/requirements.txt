@@ -3,3 +3,4 @@ stripe
 web3
 eth-testrpc
 py-solc
+flask-talisman

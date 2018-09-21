@@ -1,211 +1,144 @@
 {% extends "layout.html" %}
 {% block content %}
-  <div class="jumbotron container fluid">
-    
-    <h1>Giddy up!</h1>
-    
-    <div class="container fluid">
-      <div class="row">
-        <div class="col-md-5">
-            <p>We're moving weight, and you can too.</p>
-            <p>This is not your typical crypto token.
-            It's a token of status. It's a movement. It's a lifestyle.</p>
-            <div>MORE PROMOTIONAL MATERIAL HERE</div>
-            <p>Take life by the reigns and buy some CWBY!</p>
-        </div>
-        <div class="col-md-1">
-          <!--SPACER-->
-        </div>
-        <div class="col-md-6">
-          <form action="/charge" method="post" class="needs-validation" novalidate>
-            <h3>Buy CWBY right here!</h3>
-            <hr class="my-1">
-            <div class="form-group">
-                <label for="amountInput">Amount (CWBY)</label>
-                <div class="row">
-                  <div class="col-xs-8">
-                    <input type="number" class="form-control" id="amountInput" placeholder="10" onkeyup="setAmount()" required>
-                  </div>
-                  <div class="col-xs-1">
-                    <strong>Price: </strong>
-                    <div id="priceHeader"></div>
-                  </div>
-                </div>
-            </div>
-            <div class="form-group">
-              <label for="addressInput">ETH Address</label>
-              <input type="text" class="form-control" id="addressInput" placeholder="0xcb39f9322b21150833303453ec20aabef0817f90" onkeyup="setAddress()" required>
-              <div>
-                Please double check your ETH address before checking out.
+<div class="overlay" id="overlay_spinner_container">
+  <div class="text">Loading...</div>
+</div>
+<div class="jumbotron container fluid">
+  <h1>Giddy up!</h1>
+
+  <div class="container fluid">
+    <div class="row">
+      <div class="col-md-5">
+        <p>It's a token of status.</p>
+        <div>MORE PROMOTIONAL MATERIAL HERE</div>
+        <p>Take life by the reigns and buy some CWBY!</p>
+      </div>
+      <div class="col-md-1">
+        <!--SPACER-->
+      </div>
+      <div class="col-md-6">
+        <form action="/charge" method="post" class="needs-validation">
+          <h3>Buy CWBY right here!</h3>
+          <hr class="my-1">
+          <div class="form-group">
+            <label for="amountInput">Amount (CWBY)</label>
+            <div class="row">
+              <div class="col-xs-8">
+                <input type="number" class="form-control" id="amountInput" placeholder="10" onkeyup="setAmount()"
+                  required>
+              </div>
+              <div class="col-xs-1">
+                <strong>Price: </strong>
+                <div id="priceHeader"></div>
               </div>
             </div>
-            <button type="submit" class="btn btn-success btn-block" id="paymentButton">Purchase</button>
-          </form>
-        </div>
+          </div>
+          <div class="form-group">
+            <label for="addressInput">ETH Address</label>
+            <input type="text" class="form-control is-invalid" id="addressInput" placeholder="0xcb39f9322b21150833303453ec20aabef0817f90"
+              onkeyup="setAddress()" required>
+            <div>
+              Please double check your ETH address before checking out.
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success btn-block" id="paymentButton">Purchase</button>
+<div class="alert alert-info">
+  To test a credit card transaction, use Card: 4242-4242-4242-4242 Expire: 01/21 CVV: 123
+</div>
+        </form>
       </div>
     </div>
   </div>
+</div>
 
-  <div class="container">
-    <div class="alert alert-info">
-      Website under development... Stay posted!
-      <div class="progress">
-        <div class="progress-bar" role="progressbar" aria-valuenow="95"
-        aria-valuemin="0" aria-valuemax="100" style="width:95%">
-          Putting on the finishing touches...
-      </div>
-    </div>
-    <div class="alert alert-warning">
-      To test a credit card transaction, use Card: 4242-4242-4242-4242 Expire: 01/21 CVV: 123
-    </div>
-  </div>
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script type="text/javascript">
+  var _amount = 0;
+  var _address = '';
+  var isAddress;
 
-  <script src="https://checkout.stripe.com/checkout.js"></script>
-
-  <script>
-    const getPrice = function(){
-      return 420;
+  // INITIALIZE WEB3 using web3io.js
+  window.addEventListener('load', function () {
+    // check for web3 injection
+    if (typeof (web3) !== 'undefined') {
+      startApp(web3);
+    } else {
+      // get user to install metamask
+      window.alert("web3 is undefined. Please install Metamask.");
     }
-  </script>
+    document.getElementById("priceHeader").innerHTML = "$" + (getPrice() / 100).toFixed(2) + "/CWBY";
 
-  <script>
-    var handler = StripeCheckout.configure({
-      key: "{{ key }}",
-      image: 'https://stripe.com/img/documentation/checkout/marketplace.png',
-      locale: 'auto',
-      token: function(token){ // "AKA token callback"
-        // access token with `token.id`
-        // get token ID for server-side code usage
-        console.log(token.id);
-        
-        // redirect to charge page: confirmation of sale
-        $.redirect('/charge', 
-          {'stripeToken': token.id, 
-          'amount': getAmount()*getPrice(), 
-          'dollars': (getAmount()*getPrice()/100).toFixed(2), 
-          'coins': getAmount(),
-          'address': getAddress(),
-        });
-      }
+    // make isAddress function local
+    isAddress = w3utils.isAddress;
+  });
+
+  const handler = StripeCheckout.configure({
+    key: "{{ key }}",
+    image: 'https://stripe.com/img/documentation/checkout/marketplace.png',
+    locale: 'auto',
+    token: function (token) { // "AKA token callback"
+      // access token with `token.id`
+      // get token ID for server-side code usage
+      console.log(token.id);
+
+      showOverlay();
+
+      // redirect to charge page: confirmation of sale
+      $.redirect('/charge', {
+        'stripeToken': token.id,
+        'amount': getAmount() * getPrice(),
+        'dollars': (getAmount() * getPrice() / 100).toFixed(2),
+        'coins': getAmount(),
+        'address': getAddress(),
+      });
+    }
+  });
+
+  $.fn.redraw = function () {
+    $(this).each(function () {
+      var redraw = this.offsetHeight;
     });
+  };
 
-    document.getElementById('paymentButton').addEventListener('click', function(e){
-      // manually validate forms
-      // Fetch all the forms we want to apply custom Bootstrap validation styles to
-      var forms = document.getElementsByClassName('needs-validation');
-      // Loop over them and prevent submission
-      var validation = Array.prototype.filter.call(forms, function(form) {
-        if (form.checkValidity() === false) {
+  document.getElementById('paymentButton').addEventListener('click', function (e) {
+    // manually validate forms
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var forms = document.getElementsByClassName('needs-validation');
+    // Loop over them and prevent submission
+    var validation = Array.prototype.filter.call(forms, function (form) {
+      if (form.checkValidity() === false) {
+        e.preventDefault();
+        e.stopPropagation();
+        alert("Please fill in all fields (Amount must be an integer).");
+      } else {
+        if (getAddress() == "0x0") {
           e.preventDefault();
           e.stopPropagation();
-          alert("Please fill in all fields (Amount must be an integer).");
+          alert("Invalid address format.");
+        } else if (getAmount() <= 0) {
+          e.preventDefault();
+          e.stopPropagation();
+          alert("Amount must be greater than 0.");
+        } else { // open Checkout 
+          $("#amountInput").addClass("is-valid").removeClass("is-invalid");
+          handler.open({
+            name: 'CWBY Coin',
+            description: 'Buy ' + getAmount() + ' CWBY coins',
+            zipCode: true,
+            amount: getAmount() * getPrice(), // don't forget; getAmount() returns # of CWBY COINS
+          });
         }
-        else {
-          if (getAddress() == "0x0"){
-            e.preventDefault();
-            e.stopPropagation(); 
-            alert("Invalid address format.");
-          }
-          else if (getAmount() <= 0){
-            e.preventDefault();
-            e.stopPropagation(); 
-            alert("Amount must be greater than 0.");
-          }
-          else{
-            // open Checkout
-            handler.open({
-              name: 'CWBY Coin',
-              description: 'Buy ' + getAmount() + ' CWBY coins',
-              zipCode: true,
-              amount: getAmount() * getPrice(), // don't forget; getAmount() returns # of CWBY COINS
-            });
-          }
-        }
-        form.classList.add('was-validated');
-      });
-      e.preventDefault();
+      }
+      form.classList.add('was-validated');
     });
-
-    // close checkout on page navigation
-    window.addEventListener('popstate', function(){
-      handler.close();
-    });
-  </script>
-
-  <script>
-    var startApp = function(web3){
-      // initialize web3
-      
-      if (typeof web3 !== 'undefined') {
-          web3 = new Web3(web3.currentProvider);
-      } else {
-          // set the provider you want from Web3.providers
-          web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-      }
-
-      console.log("web3 initialized.");
-    };
-    // callback function to store value for Stripe dialog
-    var setAmount = function(){
-      var box = document.getElementById("amountInput");
-      _amount = parseInt(box.value, 10);
-      console.log(_amount);
-    }
-    
-    var getAmount = function(){
-      // get latest value just in case
-      setAmount();
-      if (_amount > 0){
-        return _amount;
-      }
-      else {
-        return 0;
-      }
-    }
-
-    var setAddress = function(){
-      var box = document.getElementById("addressInput");
-      _address = box.value;
-      if (!isAddress(_address)){
-        console.log("Invalid address: " + _address);
-      }
-      else{
-        console.log("Address is valid:" + _address);
-      }
-    }
-    
-    var getAddress = function(){
-      // get latest value just in case
-      setAddress();
-      if (isAddress(_address)){
-        return _address;
-      }
-      else{
-        return '0x0';
-      }
-    }
-
-    var _amount = 0;
-    var _address = '';
-    var isAddress;
-    
-    // INITIALIZE WEB3 using web3io.js
-    window.addEventListener('load', function(){
-      // check for web3 injection
-      if (typeof (web3) !== 'undefined'){
-        startApp(web3);
-      }
-      else{
-        // get user to install metamask
-        window.alert("web3 is undefined. Please install Metamask.");
-      }
-      document.getElementById("priceHeader").innerHTML = "$" + (getPrice()/100).toFixed(2) + "/CWBY";
-
-      // make isAddress function local
-      isAddress = w3utils.isAddress;
-    });
-  </script>
+    e.preventDefault();
+  });
+  // close checkout on page navigation
+  window.addEventListener('popstate', function () {
+    handler.close();
+  });
+  hideOverlay();
+</script>
 
 
-  
 {% endblock %}

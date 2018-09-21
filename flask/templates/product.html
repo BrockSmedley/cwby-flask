@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-4 item-photo">
+                <img src="/img/hat.jpg" class="img-thumbnail" alt="hat" />
+            </div>
+            <div class="col-xs-5" style="border:0px solid gray">
+                <!-- Datos del vendedor y titulo del producto -->
+                <h3 class="display-4" id="productTitle">Product title</h3>
+                <h5 style="color:#337ab7">mfg. by <a href="#">Manufacturer</a> · <small style="color:#337ab7">(5054
+                        reviews)</small></h5>
+
+                <!-- Precios -->
+                <h6 class="title-price"><small>Price</small></h6>
+                <h3 style="margin-top:0px;">{{cost}} CWBY</h3>
+
+
+                <!-- Botones de compra -->
+                <div class="section" style="padding-bottom:20px;">
+                    <button class="btn btn-success" id="button_buy"><span style="margin-right:20px" class="glyphicon glyphicon-shopping-cart"
+                            aria-hidden="true"></span> Buy now</button>
+                </div>
+            </div>
+
+            <div class="col-xs-9">
+                <div>
+                    <p style="padding:15px;">
+                        <small>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vehicula nunc et scelerisque tempus. Vestibulum eleifend
+                            erat sit amet purus imperdiet, ornare suscipit risus elementum. In finibus malesuada tellus non malesuada. Aliquam
+                            hendrerit purus at tempor vehicula. Integer ac justo gravida purus faucibus convallis. Etiam volutpat ex semper purus
+                            volutpat feugiat. Fusce quis sagittis nibh. Proin feugiat tempor elit eget mattis. Ut pulvinar leo eu justo molestie
+                            pulvinar. Pellentesque semper libero feugiat lorem feugiat dapibus quis eget orci. Sed pretium dapibus lorem non
+                            commodo. Nulla vitae tellus quis nulla facilisis congue nec a justo.
+                            
+                            Mauris vel sodales nunc. Mauris vel sodales nunc., vulputate vitae mauris id, efficitur interdum velit. Suspendisse
+                            porttitor augue in urna placerat, ac venenatis sapien cursus. Nulla a molestie lorem. Praesent ullamcorper, metus sed
+                            tempus commodo, sem mauris volutpat diam, nec fringilla nunc arcu gravida lorem. Duis tempus et nunc pharetra luctus.
+                            Duis a velit in tellus aliquam vestibulum vitae sit amet nisi. Donec ut orci condimentum, ornare mauris vitae, aliquam
+                            dolor. Praesent sit amet turpis consectetur metus ultricies dignissim. Aliquam urna elit, iaculis eu tincidunt sit
+                            amet, accumsan et mauris.
+                        </small>
+                    </p>
+                    <small>
+                        <ul>
+                            <li>Mauris vel sodales nunc.</li>
+                            <li>AMauris vel sodales nunc.</li>
+                            <li>porttitor augue in urna placerat 850 / 900 / 1800</li>
+                            <li>hendrerit purus at tempor vehicula</li>
+                            <li>erat sit amet purus imperdiet</li>
+                            <li>ornare suscipit risus elementum</li>
+                            <li>In finibus malesuada tellus non malesuada</li>
+                            <li>Aliquam hendrerit purus at tempor vehicula</li>
+                            <li>Integer ac justo gravida purus faucibus convallis</li>
+                            <li>Etiam volutpat ex semper purus</li>
+                            <li>volutpat feugiat</li>
+                            <li>Fusce quis sagittis nibh.</li>
+                        </ul>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //-- Click on detail
+            $("ul.menu-items > li").on("click", function () {
+                $("ul.menu-items > li").removeClass("active");
+                $(this).addClass("active");
+            });
+
+            $(".attr,.attr2").on("click", function () {
+                var clase = $(this).attr("class");
+
+                $("." + clase).removeClass("active");
+                $(this).addClass("active");
+            });
+
+            // click on buy
+            $("#button_buy").on("click", function () {
+                // get product cost
+                cost='{{cost}}';
+                console.log(cost);
+
+                spendTokens(cost);
+            });
+        });
+        // INITIALIZE WEB3 using web3io.js
+        window.addEventListener('load', function () {
+        // check for web3 injection
+        if (typeof (web3) !== 'undefined') {
+            startApp(web3);
+        } else {
+            // get user to install metamask
+            window.alert("web3 is undefined. Please install Metamask.");
+        }
+        });
+    </script>
+    
+{% endblock %}
