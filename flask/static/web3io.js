@@ -220,7 +220,9 @@ const getPrice = function () {
 };
 
 const getContractAddress = function () {
-    return "0x731a10897d267e19B34503aD902d0A29173Ba4B1";
+    //return "0x731a10897d267e19B34503aD902d0A29173Ba4B1"; // OG CWBY
+    return "0x492934308E98b590A626666B703A6dDf2120e85e"; // cdev
+    
 }
 
 // spend CWBY coins from user account
@@ -248,7 +250,7 @@ const spendTokens = function (cost) {
                         console.log(result);
                         // return tx hash if transaction succeeded
                         alert("bought it!");
-                        return 1;
+                        
                     }
                     else {
                         console.error(error);

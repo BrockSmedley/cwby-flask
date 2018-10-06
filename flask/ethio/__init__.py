@@ -273,7 +273,9 @@ def abi():
 
 
 def getContractAddress():
-    return '0x731a10897d267e19B34503aD902d0A29173Ba4B1'
+    # return '0x731a10897d267e19B34503aD902d0A29173Ba4B1'
+    # TODO: make this a route to be accessed by js
+    return '0x492934308E98b590A626666B703A6dDf2120e85e'
 
 
 def orderCoins(numCoins, address_receiver, provider=None):

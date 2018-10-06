@@ -13,27 +13,8 @@ SUPPORT_EMAIL = "damonsmedley12@gmail.com"
 csp = {
     'default-src': [
         "'self'",
-        'maxcdn.bootstrapcdn.com',
-        'https://checkout.stripe.com',
-        'https://q.stripe.com',
-        'ajax.googleapis.com',
-        'https://cdn.rawgit.com',
-        'ajax.googleapis.com',
-        'maxcdn.bootstrapcdn.com',
-        'https://checkout.stripe.com',
-        'https://q.stripe.com',
-        'localhost:5000/',
         "'unsafe-inline'",
         "'unsafe-eval'"  # change this!
-    ],
-    'style-src': [
-        '\'unsafe-inline\'',
-        '\'self\'',
-        'localhost:5000/',
-        'https://maxcdn.bootstrapcdn.com',
-    ],
-    'connect-src': [
-        '*',
     ]
 }
 
@@ -53,7 +34,7 @@ stripe_keys = {
 stripe.api_key = stripe_keys['secret_key']
 
 app = Flask(__name__, static_url_path='')
-Talisman(app, content_security_policy=csp, force_https=force_https)
+# Talisman(app, force_https=force_https, content_security_policy=csp)
 
 
 # APP ROUTES
