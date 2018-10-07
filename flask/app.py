@@ -1,6 +1,7 @@
 import os
 import sys
-from flask import Flask, render_template, request, redirect, send_from_directory, url_for
+from flask import Flask, render_template, request, redirect, send_from_directory, url_for, abort
+import requests
 import stripe
 import binascii
 from flask_talisman import Talisman
@@ -9,6 +10,24 @@ import ethio
 
 force_https = False
 SUPPORT_EMAIL = "damonsmedley12@gmail.com"
+
+MOLTIN_SID = '1884465437547168601'
+MOLTIN_CID = 'x60kAvxYDej5b3sabMWHy08xi0Z24S6CYJeoaaGouZ'
+MOLTIN_CSC = 'db2gPRaGP9zDhBoP1bUf3U4uPG3dxwlsyJSkKzFi7C'
+
+moltin_auth_url = "https://api.moltin.com/oauth/access_token"
+moltin_auth_body = {'client_id': MOLTIN_CID,
+                    'client_secret': MOLTIN_CSC, 'grant_type': "client_credentials"}
+
+auth_req = requests.post(moltin_auth_url, data=moltin_auth_body)
+auth_resp = auth_req.json()
+
+auth_token_type = auth_resp['token_type']
+auth_token = auth_resp['access_token']
+
+auth = "%s %s" % (auth_token_type, auth_token)
+auth_header = {'Authorization': auth}
+print(auth_header)
 
 csp = {
     'default-src': [
@@ -51,10 +70,40 @@ def favicon():
 # product description page
 @app.route('/product/<pid>', methods=['GET'])
 def product(pid):
-    pid = pid
+    print(pid, file=sys.stderr)
     # fetch data from DB to build product page with pid
+    url = "https://api.moltin.com/v2/products/%s" % str(pid)
+
+    print(url, file=sys.stderr)
+    productRequest = requests.get(
+        url, headers=auth_header)
+
+    jdata = productRequest.json()
+
+    if ('errors' in jdata):
+        print(jdata['errors'], file=sys.stderr)
+        abort(404)
+
+    print("JDATA")
+    print(jdata, file=sys.stderr)
+    productData = jdata['data']
+    metaData = productData['meta']
+
+    if (metaData['stock']['availability'] != "in-stock"):
+        return render_template("product.html", pid=pid, cost=999999, status="Sold Out")
+
+    name = productData['name']
+    description = productData['description']
+    price = productData['price'][0]['amount']
+
+    imageId = productData['relationships']['main_image']['data']['id']
+    url = "https://api.moltin.com/v2/files/%s" % imageId
+    imgReq = requests.get(url, headers=auth_header)
+    imgResult = imgReq.json()
+    imgUrl = imgResult['data']['link']['href']
+
     # add arguments for product data
-    return render_template('product.html', pid=pid, cost=12)
+    return render_template('product.html', name=name, description=description, cost=price, imgUrl=imgUrl)
 
 
 @app.route('/charge', methods=['POST'])
