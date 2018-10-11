@@ -1,0 +1,22 @@
+{% extends "layout.jinja" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        {% for i in products %}
+            <div class="col-xs-4">
+                <div class="card" style="width: 18rem;">
+                    {% if i['id'] in images %}
+                        <img class="card-img-top" src="{{images[i['id']]}}" alt="Card image cap" style="width: 100px">
+                    {% else %}
+                        <span class="card-img-top">No image found</span>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title"><a href="/product/{{ i['id'] }}">{{ i['name'] }}</a></h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
