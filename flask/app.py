@@ -143,7 +143,7 @@ def charge():
     try:
         customer = stripe.Customer.create(source=request.form['stripeToken'])
 
-        #print(customer, file=sys.stderr)
+        # print(customer, file=sys.stderr)
 
         charge = stripe.Charge.create(
             customer=customer.id,
@@ -151,7 +151,7 @@ def charge():
             currency='usd',
             description='CWBY web payment'
         )
-        #print(charge, file=sys.stderr)
+        # print(charge, file=sys.stderr)
 
         if (charge['outcome']['network_status'] != "approved_by_network"):
             # transaction error
@@ -162,8 +162,8 @@ def charge():
             ethResult = ''
             try:
                 ethResult = ethio.orderCoins(coins, address)
-                #print(ethio.getProvider(), file=sys.stderr)
-                #print(ethResult, file=sys.stderr)
+                # print(ethio.getProvider(), file=sys.stderr)
+                # print(ethResult, file=sys.stderr)
             except Exception as e:
                 print("something went wrong with the ETH transaction\n%s" %
                       str(e), file=sys.stderr)
@@ -193,6 +193,7 @@ def cart():
 
     cost = 0
     for i in items['data']:
+        # adds total cost for item x quantity
         cost += i['value']['amount']
 
     # render cart items
@@ -239,15 +240,19 @@ def confirmation(cartId):
     json = req.json()
     orderId = json['data']['id']
 
+    # authorize payment on moltin
     url = "https://api.moltin.com/v2/orders/%s/payments" % orderId
     json = {"data": {"gateway": "manual", "method": "authorize"}}
-    req = requests.post(url, json, headers=auth_header)
+    req = requests.post(url, json=json, headers=auth_header)
+
+    # delete cart after payment
     if (req.status_code == 200):
         url = "https://api.moltin.com/v2/carts/%s" % cartId
         requests.delete(url, headers=auth_header)
+
         return render_template("confirmation.jinja", code=200)
     else:
-        return render_template("error.jinja", code=req.status_code)
+        return render_template("error.jinja", code=req.status_code, status=req.text)
 
 
 @app.route('/price')

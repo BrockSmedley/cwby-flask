@@ -6,7 +6,7 @@
             <div class="col-xs-4">
                 <div class="card" style="width: 18rem;">
                     {% if i['id'] in images %}
-                        <img class="card-img-top" src="{{images[i['id']]}}" alt="Card image cap" style="width: 100px">
+                        <img class="card-img-top img-thumbnail" src="{{images[i['id']]}}" alt="Card image cap" >
                     {% else %}
                         <span class="card-img-top">No image found</span>
                     {% endif %}

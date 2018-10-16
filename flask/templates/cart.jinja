@@ -1,15 +1,38 @@
 {% extends "layout.jinja" %}
 {% block content %}
     <div class="container">
-        {% for i in items['data'] %}
-            <div class="row">
-                {{ i }}
+        <div class="row" style="margin-bottom: 8px;">
+            <div class="col-md-8">
+                {% for i in items['data'] %}
+                    <div class="row container-fluid">
+                        <div class="col-md-1">
+                            <img src="{{ i['image']['href'] }}" class="img-thumbnail">
+                        </div>
+                        <div class="col-md-8">{{ i['name'] }}</div>
+                        <div class="col-md-3">
+                            <span>({{ i['quantity'] }}) Price: {{ i['unit_price']['amount'] }} CWBY</span>
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
-        {% endfor %}
+            <div class="col-md-4 container fluid">
+                <div class="row">
+                    <span>Subtotal: {{cost}} CWBY</span>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <button class="btn btn-success" id="button_buy">
+                            <span style="margin-right:20px" 
+                                class="glyphicon glyphicon-shopping-cart"
+                                aria-hidden="true">
+                            </span>
+                            Checkout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <button class="btn btn-success" id="button_buy"><span style="margin-right:20px" class="glyphicon glyphicon-shopping-cart"
-                            aria-hidden="true"></span>Checkout</button>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -35,7 +58,7 @@
                 spendTokens(cost);
 
                 // authorize moltin payment
-                window.location.replace("/confirmation/" + {{ cartId }});
+                window.location.href = ("/confirmation/" + "{{ cartId }}");
             });
         });
         // INITIALIZE WEB3 using web3io.js
