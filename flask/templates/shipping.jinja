@@ -1,0 +1,25 @@
+{% extends "layout.jinja" %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <form action="/confirmation/{{cartId}}" method="POST">
+                <div class="col-md-6">
+                    <input type="text" name="address1">
+                    <input type="text" name="address2">
+                    <input type="text" name="city">
+                    <input type="text" name="state">
+                    <input type="text" name="zip">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-success" id="button_buy">
+                        <span style="margin-right:20px" 
+                            class="glyphicon glyphicon-shopping-cart"
+                            aria-hidden="true">
+                        </span>
+                        Checkout
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

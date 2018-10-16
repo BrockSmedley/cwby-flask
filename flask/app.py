@@ -200,9 +200,13 @@ def cart():
     return render_template("cart.jinja", items=items, cost=cost, cartId=cartId)
 
 
-@app.route('/confirmation/<cartId>')
+@app.route('/shipping/<cartId>')
+def shipping(cartId):
+    return render_template("shipping.jinja", cartId=cartId)
+
+
+@app.route('/confirmation/<cartId>', methods=["POST"])
 def confirmation(cartId):
-    url = "https://api.moltin.com/v2/carts/%s/checkout" % cartId
     json = {
         "data": {
             "customer": {
@@ -235,6 +239,9 @@ def confirmation(cartId):
             }
         }
     }
+    print(json)
+
+    url = "https://api.moltin.com/v2/carts/%s/checkout" % cartId
     req = requests.post(url, json=json, headers=auth_header)
 
     json = req.json()

@@ -21,55 +21,20 @@
                 </div>
                 <div class="row">
                     <div class="col">
-                        <button class="btn btn-success" id="button_buy">
-                            <span style="margin-right:20px" 
-                                class="glyphicon glyphicon-shopping-cart"
-                                aria-hidden="true">
-                            </span>
-                            Checkout
-                        </button>
+                        <form action="/shipping/{{cartId}}" method="GET">
+                            <button type="submit" class="btn btn-success" id="button_buy">
+                                <span style="margin-right:20px" 
+                                    class="glyphicon glyphicon-shopping-cart"
+                                    aria-hidden="true">
+                                </span>
+                                Checkout
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script type="text/javascript">
-        $(document).ready(function () {
-            //-- Click on detail
-            $("ul.menu-items > li").on("click", function () {
-                $("ul.menu-items > li").removeClass("active");
-                $(this).addClass("active");
-            });
-
-            $(".attr,.attr2").on("click", function () {
-                var clase = $(this).attr("class");
-
-                $("." + clase).removeClass("active");
-                $(this).addClass("active");
-            });
-
-            // click on buy
-            $("#button_buy").on("click", function () {
-                // get product cost
-                cost='{{cost}}';
-                console.log(cost);
-
-                spendTokens(cost);
-
-                // authorize moltin payment
-                window.location.href = ("/confirmation/" + "{{ cartId }}");
-            });
-        });
-        // INITIALIZE WEB3 using web3io.js
-        window.addEventListener('load', function () {
-        // check for web3 injection
-        if (typeof (web3) !== 'undefined') {
-            startApp(web3);
-        } else {
-            // get user to install metamask
-            window.alert("web3 is undefined. Please install Metamask.");
-        }
-        });
-    </script>
+    
 {% endblock %}
