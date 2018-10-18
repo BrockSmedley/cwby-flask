@@ -226,7 +226,7 @@ const getContractAddress = function () {
 }
 
 // spend CWBY coins from user account
-const spendTokens = function (cost) {
+var spendTokens = function (cost) {
     // get user address
     const address = web3.eth.defaultAccount;
     const _cost = parseInt(cost);
@@ -261,6 +261,7 @@ const spendTokens = function (cost) {
                 console.log("Cost: " + cost + " CWBY");
                 console.log("Balance insufficient.");
                 alert("Insufficient balance. Buy more CWBY to purchase this item!");
+                return -1;
             }
         }
         else{

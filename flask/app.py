@@ -200,9 +200,12 @@ def cart():
     return render_template("cart.jinja", items=items, cost=cost, cartId=cartId)
 
 
-@app.route('/shipping/<cartId>')
-def shipping(cartId):
-    return render_template("shipping.jinja", cartId=cartId)
+@app.route('/shipping', methods=['POST'])
+def shipping():
+    data = request.form
+    cost = data['cost']
+    cartId = data['cartId']
+    return render_template("shipping.jinja", cartId=cartId, cost=cost)
 
 
 @app.route('/confirmation/<cartId>', methods=["POST"])

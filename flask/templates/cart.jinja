@@ -21,7 +21,9 @@
                 </div>
                 <div class="row">
                     <div class="col">
-                        <form action="/shipping/{{cartId}}" method="GET">
+                        <form action="/shipping" method="POST">
+                            <input type="hidden" id="cartId" name="cartId" value="{{cartId}}">
+                            <input type="hidden" id="cost" name="cost" value="{{cost}}">
                             <button type="submit" class="btn btn-success" id="button_buy">
                                 <span style="margin-right:20px" 
                                     class="glyphicon glyphicon-shopping-cart"
