@@ -121,17 +121,22 @@ def favicon():
 @app.route('/products', methods=['GET'])
 def products():
     url = "https://api.moltin.com/v2/products"
-    productRequest = requests.get(
+    productsRequest = requests.get(
         url, headers=moltinHeader())
-    jdata = productRequest.json()
+    jdata = productsRequest.json()
 
     if ('errors' in jdata):
         print(jdata['errors'], file=sys.stderr)
         abort(404)
 
     images = {}
+    shit = []
     for d in jdata['data']:
-        if ("main_image" in d["relationships"]):
+        # detect non-live/draft items
+        if (d['status'] != 'live'):
+            # add non-live item to shit list
+            shit.append(d)
+        elif ("main_image" in d["relationships"]):
             imgId = d['relationships']['main_image']['data']['id']
             imgReq = requests.get(
                 "https://api.moltin.com/v2/files/%s" % imgId, headers=moltinHeader())
@@ -141,17 +146,19 @@ def products():
             print(imgUrl)
             images[d['id']] = imgUrl
 
+    # remove draft items
+    for s in shit:
+        jdata['data'].remove(s)
+
     return render_template("products.jinja", products=jdata['data'], lproducts=len(jdata['data']), images=images)
 
 
 # product description page
 @app.route('/product/<pid>', methods=['GET'])
 def product(pid):
-    print(pid, file=sys.stderr)
     # fetch data from DB to build product page with pid
     url = "https://api.moltin.com/v2/products/%s" % str(pid)
 
-    print(url, file=sys.stderr)
     productRequest = requests.get(
         url, headers=moltinHeader())
 
@@ -170,9 +177,10 @@ def product(pid):
     description = productData['description']
     price = productData['price'][0]['amount']
 
+    print(productData, file=sys.stderr)
+
     imageId = productData['relationships']['main_image']['data']['id']
     url = "https://api.moltin.com/v2/files/%s" % imageId
-    print(url, file=sys.stderr)
     imgReq = requests.get(url, headers=moltinHeader())
     imgResult = imgReq.json()
     imgUrl = imgResult['data']['link']['href']
