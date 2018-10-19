@@ -1,13 +1,19 @@
 import os
 import sys
-from flask import Flask, render_template, request, redirect, send_from_directory, url_for, abort
+from flask import Flask, render_template, request, redirect, send_from_directory, url_for, abort, session, escape
+from sesh import RedisSessionInterface
 import requests
 import stripe
 import binascii
+import redis
+import secrets
 from flask_talisman import Talisman
 
 import ethio
+import sesh
 
+
+# CONSTANTS ################################
 force_https = False
 SUPPORT_EMAIL = "damonsmedley12@gmail.com"
 
@@ -37,7 +43,8 @@ csp = {
     ]
 }
 
-# SETUP
+
+# INIT CONF ####################################
 # stripe keyfile must have secret key on first line and pub key on second
 keyfile = open('.stripekeys', 'r')
 secret_key = keyfile.readline().strip('\n')
@@ -49,16 +56,40 @@ stripe_keys = {
     'secret_key': secret_key,
     'publishable_key': publishable_key
 }
-
 stripe.api_key = stripe_keys['secret_key']
 
+
+# Construct app
 app = Flask(__name__, static_url_path='')
+app.session_interface = RedisSessionInterface()
+# TODO: Enforce CSP
 # Talisman(app, force_https=force_https, content_security_policy=csp)
+
+
+def setKey():
+    session['key'] = secrets.token_urlsafe()
+
+
+def getKey():
+    res = session.get('key', 'not set')
+    if (res == 'not set'):
+        print("CURRENT USER HAS NO SESSION KEY. GENERATING NOW.")
+        setKey()
+        return session.get('key', 'error')
+    else:
+        print("FOUND LIVE SESSION KEY: %s" % res)
+        return res
 
 
 # APP ROUTES
 @app.route('/')
 def index():
+    if 'key' in session:
+        print("USER IS LOGGED IN as %s" % escape(session['key']))
+    else:
+        print("USER IS NOT LOGGED IN. GENERATING KEY.")
+        setKey()
+
     return render_template('index.jinja', key=stripe_keys['publishable_key'])
 
 
@@ -183,7 +214,7 @@ def charge():
 
 @app.route('/cart', methods=["GET", "POST"])
 def cart():
-    cartId = "reference111"
+    cartId = getKey()
     if (request.method == "POST"):
         # add item to cart
         itemId = request.form['id']

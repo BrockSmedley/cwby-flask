@@ -4,3 +4,5 @@ web3
 eth-testrpc
 py-solc
 flask-talisman
+flask-session
+redis

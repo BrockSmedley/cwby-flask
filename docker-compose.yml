@@ -23,6 +23,13 @@ services:
     networks:
       legacy:
         ipv4_address: 172.70.0.3
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      legacy:
+        ipv4_address: 172.70.0.4
 
 networks:
   legacy:
