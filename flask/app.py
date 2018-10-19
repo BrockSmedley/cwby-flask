@@ -21,20 +21,6 @@ MOLTIN_SID = '1884465437547168601'
 MOLTIN_CID = 'x60kAvxYDej5b3sabMWHy08xi0Z24S6CYJeoaaGouZ'
 MOLTIN_CSC = 'db2gPRaGP9zDhBoP1bUf3U4uPG3dxwlsyJSkKzFi7C'
 
-moltin_auth_url = "https://api.moltin.com/oauth/access_token"
-moltin_auth_body = {'client_id': MOLTIN_CID,
-                    'client_secret': MOLTIN_CSC, 'grant_type': "client_credentials"}
-
-auth_req = requests.post(moltin_auth_url, data=moltin_auth_body)
-auth_resp = auth_req.json()
-
-auth_token_type = auth_resp['token_type']
-auth_token = auth_resp['access_token']
-
-auth = "%s %s" % (auth_token_type, auth_token)
-auth_header = {'Authorization': auth}
-print(auth_header)
-
 csp = {
     'default-src': [
         "'self'",
@@ -63,6 +49,7 @@ stripe.api_key = stripe_keys['secret_key']
 app = Flask(__name__, static_url_path='')
 app.session_interface = RedisSessionInterface()
 # TODO: Enforce CSP
+# TODO: Pimp out config (http://flask.pocoo.org/docs/1.0/config/)
 # Talisman(app, force_https=force_https, content_security_policy=csp)
 
 
@@ -79,6 +66,34 @@ def getKey():
     else:
         print("FOUND LIVE SESSION KEY: %s" % res)
         return res
+
+
+def moltinHeader():
+    res = session.get('moltinKey', 'not set')
+    if (res == 'not set'):
+        auth_header = authMoltin()
+        return session.get('moltinKey', 'error')
+    else:
+        return res
+
+
+def authMoltin():
+    moltin_auth_url = "https://api.moltin.com/oauth/access_token"
+
+    moltin_auth_body = {'client_id': MOLTIN_CID,
+                        'client_secret': MOLTIN_CSC, 'grant_type': "client_credentials"}
+
+    auth_req = requests.post(moltin_auth_url, data=moltin_auth_body)
+    auth_resp = auth_req.json()
+
+    auth_token_type = auth_resp['token_type']
+    auth_token = auth_resp['access_token']
+
+    auth = "%s %s" % (auth_token_type, auth_token)
+    auth_header = {'Authorization': auth}
+    print(auth_header)
+    session['moltinKey'] = auth_header
+    return "OK"
 
 
 # APP ROUTES
@@ -107,7 +122,7 @@ def favicon():
 def products():
     url = "https://api.moltin.com/v2/products"
     productRequest = requests.get(
-        url, headers=auth_header)
+        url, headers=moltinHeader())
     jdata = productRequest.json()
 
     if ('errors' in jdata):
@@ -119,7 +134,7 @@ def products():
         if ("main_image" in d["relationships"]):
             imgId = d['relationships']['main_image']['data']['id']
             imgReq = requests.get(
-                "https://api.moltin.com/v2/files/%s" % imgId, headers=auth_header)
+                "https://api.moltin.com/v2/files/%s" % imgId, headers=moltinHeader())
             imgJson = imgReq.json()
             print("IMGJSON: %s" % str(imgJson))
             imgUrl = imgJson['data']['link']['href']
@@ -138,7 +153,7 @@ def product(pid):
 
     print(url, file=sys.stderr)
     productRequest = requests.get(
-        url, headers=auth_header)
+        url, headers=moltinHeader())
 
     jdata = productRequest.json()
 
@@ -160,7 +175,7 @@ def product(pid):
 
     imageId = productData['relationships']['main_image']['data']['id']
     url = "https://api.moltin.com/v2/files/%s" % imageId
-    imgReq = requests.get(url, headers=auth_header)
+    imgReq = requests.get(url, headers=moltinHeader())
     imgResult = imgReq.json()
     imgUrl = imgResult['data']['link']['href']
 
@@ -220,11 +235,11 @@ def cart():
         itemId = request.form['id']
         url = "https://api.moltin.com/v2/carts/%s/items" % cartId
         json = {"data": {"id": itemId, "type": "cart_item", "quantity": 1}}
-        req = requests.post(url, json=json, headers=auth_header)
+        req = requests.post(url, json=json, headers=moltinHeader())
 
     # retrieve cart items
     url = "https://api.moltin.com/v2/carts/%s/items" % cartId
-    req = requests.get(url, headers=auth_header)
+    req = requests.get(url, headers=moltinHeader())
     items = req.json()
 
     cost = 0
@@ -282,7 +297,7 @@ def confirmation():
     print(json)
 
     url = "https://api.moltin.com/v2/carts/%s/checkout" % cartId
-    req = requests.post(url, json=json, headers=auth_header)
+    req = requests.post(url, json=json, headers=moltinHeader())
 
     json = req.json()
     orderId = json['data']['id']
@@ -290,12 +305,12 @@ def confirmation():
     # authorize payment on moltin
     url = "https://api.moltin.com/v2/orders/%s/payments" % orderId
     json = {"data": {"gateway": "manual", "method": "authorize"}}
-    req = requests.post(url, json=json, headers=auth_header)
+    req = requests.post(url, json=json, headers=moltinHeader())
 
     # delete cart after payment
     if (req.status_code == 200):
         url = "https://api.moltin.com/v2/carts/%s" % cartId
-        requests.delete(url, headers=auth_header)
+        requests.delete(url, headers=moltinHeader())
 
         return render_template("confirmation.jinja", code=200)
     else:
