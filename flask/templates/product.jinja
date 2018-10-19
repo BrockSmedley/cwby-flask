@@ -27,6 +27,7 @@
                 <div class="section" style="padding-bottom:20px;">
                     <form action="/cart" method="POST">
                         <input type="hidden" id="id" name="id" value="{{ pid }}">
+                        <input type="number" id="quantity" name="quantity" value="1">
                         <button type="submit" class="btn btn-success" id="button_buy" {% if status=="Sold Out" %}disabled{% endif %}>
                             <span style="margin-right:20px" class="glyphicon glyphicon-shopping-cart"></span>Add to Cart
                         </button>

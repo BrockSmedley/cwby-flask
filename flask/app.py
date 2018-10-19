@@ -241,8 +241,10 @@ def cart():
     if (request.method == "POST"):
         # add item to cart
         itemId = request.form['id']
+        quantity = request.form['quantity']
         url = "https://api.moltin.com/v2/carts/%s/items" % cartId
-        json = {"data": {"id": itemId, "type": "cart_item", "quantity": 1}}
+        json = {"data": {"id": itemId, "type": "cart_item",
+                         "quantity": int(quantity)}}
         req = requests.post(url, json=json, headers=moltinHeader())
 
     # retrieve cart items
