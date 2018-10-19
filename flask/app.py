@@ -161,13 +161,10 @@ def product(pid):
         print(jdata['errors'], file=sys.stderr)
         abort(404)
 
-    print("JDATA")
-    print(jdata, file=sys.stderr)
+    # print("JDATA")
+    #print(jdata, file=sys.stderr)
     productData = jdata['data']
     metaData = productData['meta']
-
-    if (metaData['stock']['availability'] != "in-stock"):
-        return render_template("product.jinja", pid=pid, cost=999999, status="Sold Out")
 
     name = productData['name']
     description = productData['description']
@@ -175,12 +172,15 @@ def product(pid):
 
     imageId = productData['relationships']['main_image']['data']['id']
     url = "https://api.moltin.com/v2/files/%s" % imageId
+    print(url, file=sys.stderr)
     imgReq = requests.get(url, headers=moltinHeader())
     imgResult = imgReq.json()
     imgUrl = imgResult['data']['link']['href']
 
-    # add arguments for product data
-    return render_template('product.jinja', name=name, description=description, cost=price, imgUrl=imgUrl, pid=pid)
+    if (metaData['stock']['availability'] != "in-stock"):
+        return render_template("product.jinja", pid=pid, status="Sold Out", description=description, imgUrl=imgUrl)
+    else:
+        return render_template('product.jinja', name=name, description=description, cost=price, imgUrl=imgUrl, pid=pid)
 
 
 @app.route('/charge', methods=['POST'])

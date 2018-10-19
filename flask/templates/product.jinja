@@ -15,21 +15,22 @@
 
                 <!-- Precios -->
                 <h6 class="title-price"><small>Price</small></h6>
-                <h3 style="margin-top:0px;">{{cost}} CWBY</h3>
-
+                <h3 style="margin-top:0px;">
+                    {% if not status %}
+                        {{cost}} CWBY
+                    {% else %}
+                        {{status}}
+                    {% endif %}
+                </h3>
 
                 <!-- Botones de compra -->
                 <div class="section" style="padding-bottom:20px;">
-                    {% if status %}
-                    {{ status }}
-                    {% endif %}
                     <form action="/cart" method="POST">
                         <input type="hidden" id="id" name="id" value="{{ pid }}">
-                        <button type="submit" class="btn btn-success" id="button_buy" {% if status=="sold_out" %}disabled{% endif %}>
+                        <button type="submit" class="btn btn-success" id="button_buy" {% if status=="Sold Out" %}disabled{% endif %}>
                             <span style="margin-right:20px" class="glyphicon glyphicon-shopping-cart"></span>Add to Cart
                         </button>
-                    </form>
-                    
+                    </form>                    
                 </div>
             </div>
 
