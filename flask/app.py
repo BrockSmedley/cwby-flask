@@ -62,6 +62,11 @@ def index():
     return render_template('index.jinja', key=stripe_keys['publishable_key'])
 
 
+@app.route('/_contractAddress')
+def _contractAddress():
+    return ethio.getContractAddress()
+
+
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico')
@@ -208,8 +213,9 @@ def shipping():
     return render_template("shipping.jinja", cartId=cartId, cost=cost)
 
 
-@app.route('/confirmation/<cartId>', methods=["POST"])
-def confirmation(cartId):
+@app.route('/confirmation', methods=["POST"])
+def confirmation():
+    cartId = request.form['cartId']
     json = {
         "data": {
             "customer": {

@@ -3,7 +3,7 @@
     <div class="container">
         <h2>Shipping Details</h2>
         <div class="row">
-            <form action="/confirmation/{{cartId}}" method="POST">
+            <form action="/confirmation" method="POST">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="address1">Address 1</label>
@@ -25,6 +25,7 @@
                         <label for="zip">Zip Code</label>
                         <input type="text" class="form-control" id="zip" required>
                     </div>
+                    <input type="hidden" id="cartId" name="cartId" value="{{cartId}}">
                 </div>
                 <div class="col-md-6">
                         <input type="email" class="form-control" placeholder="Email address" aria-label="Email address" aria-describedby="email-address">
@@ -59,9 +60,13 @@
                 cost='{{cost}}';
                 console.log(cost);
 
+                window.showOverlay();
+
+
                 if (spendTokens(cost) == 0){
-                    window.preventDefault();
+                    alert("Please confirm the transaction in MetaMask.");
                 }
+                //$("#button_buy").attr("disabled", true);
             });
         });
         // INITIALIZE WEB3 using web3io.js

@@ -13,6 +13,10 @@ from web3.contract import ConciseContract
 # Public key:  a074c22e55610001e52b567f887dddd62b1874981a46d6cf1db0e7f2fba00a91a62576bd96fab6e558a1a05b114d06e92996f14bcf244d3232ffd297fa951856
 #Address:     0x85D519832Eee2ea676419F896B6E0A1e83a28CEA
 
+CONTRACT_ADDRESS = '0x492934308E98b590A626666B703A6dDf2120e85e'
+# '0x731a10897d267e19B34503aD902d0A29173Ba4B1'
+
+
 def compileTestContract():
     # Solidity source code
     contract_src = '''
@@ -273,9 +277,8 @@ def abi():
 
 
 def getContractAddress():
-    # return '0x731a10897d267e19B34503aD902d0A29173Ba4B1'
     # TODO: make this a route to be accessed by js
-    return '0x492934308E98b590A626666B703A6dDf2120e85e'
+    return CONTRACT_ADDRESS
 
 
 def orderCoins(numCoins, address_receiver, provider=None):

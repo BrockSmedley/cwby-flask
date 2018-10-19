@@ -6962,7 +6962,11 @@ module.exports = {
 };
 
 },{"bn.js":13,"eth-lib/lib/hash":1,"number-to-bn":6,"underscore":11,"utf8":12}],17:[function(require,module,exports){
-const w3utils = require('web3-utils');;
+const w3utils = require('web3-utils');
+
+const api_host = "http://172.70.0.2:5000";
+const CONTRACT_ADDRESS = "0x492934308E98b590A626666B703A6dDf2120e85e"; // cdev
+// "0x731a10897d267e19B34503aD902d0A29173Ba4B1"; // OG CWBY
 
 const startApp = function (web3) {
     // initialize web3
@@ -7184,13 +7188,23 @@ const getPrice = function () {
 };
 
 const getContractAddress = function () {
-    //return "0x731a10897d267e19B34503aD902d0A29173Ba4B1"; // OG CWBY
-    return "0x492934308E98b590A626666B703A6dDf2120e85e"; // cdev
+    return CONTRACT_ADDRESS;
+    // TODO: pull this from oracle
+    /*
+    const Http = new XMLHttpRequest();
+    const url = api_host + "/_contractAddress";
+    Http.open("GET", url);
+    Http.send();
     
+    Http.onreadystatechange = (e) => {
+        return Http.responseText;
+    }
+    */
 }
 
 // spend CWBY coins from user account
 const spendTokens = function (cost) {
+    showOverlay();
     // get user address
     const address = web3.eth.defaultAccount;
     const _cost = parseInt(cost);
@@ -7205,16 +7219,16 @@ const spendTokens = function (cost) {
     tokens.balanceOf(address, function (error, result) {
         if (!error){
             console.log("balance: " + result);
+            console.log("Cost: " + cost + " CWBY");
             balance = result;
             // attempt transaction
             if (balance >= _cost) {
                 // spend the tokens
                 tokens.transfer(_to=getContractAddress(), _value=_cost, function(error, result){
                     if (!error){
+                        // log tx hash if transaction succeeded
+                        hideOverlay();
                         console.log(result);
-                        // return tx hash if transaction succeeded
-                        alert("bought it!");
-                        
                     }
                     else {
                         console.error(error);
@@ -7222,7 +7236,6 @@ const spendTokens = function (cost) {
                 })
             }
             else {
-                console.log("Cost: " + cost + " CWBY");
                 console.log("Balance insufficient.");
                 alert("Insufficient balance. Buy more CWBY to purchase this item!");
                 return 0;
