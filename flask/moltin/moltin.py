@@ -61,7 +61,7 @@ def get_product(productId):
         url, headers=auth_header())
 
 
-def add_cart_item(itemId, quantity):
+def add_cart_item(itemId, quantity, cartId):
     json = {"data": {"id": itemId, "type": "cart_item",
                      "quantity": int(quantity)}}
     url = "https://api.moltin.com/v2/carts/%s/items" % cartId
@@ -74,9 +74,9 @@ def get_cart_items(cartId):
     return requests.get(url, headers=auth_header())
 
 
-def checkout(cartId):
+def checkout(cartId, orderData):
     url = "https://api.moltin.com/v2/carts/%s/checkout" % cartId
-    return requests.post(url, json=json, headers=auth_header())
+    return requests.post(url, json=orderData, headers=auth_header())
 
 
 def authorize_payment(orderId):
@@ -117,5 +117,5 @@ def solidRequest(function, **kwargs):
 
 # forces auth by trying to make a trivial request & authenticating if needed
 # should be used if calling the {bitch functions} manually
-def ensure_auth(session):
-    request(get_settings)
+def ensure_auth():
+    solidRequest(get_settings)

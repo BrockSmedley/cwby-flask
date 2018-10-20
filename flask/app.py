@@ -217,7 +217,7 @@ def cart():
         itemId = request.form['id']
         quantity = request.form['quantity']
         req = moltin.solidRequest(
-            moltin.add_cart_item, itemId=itemId, quantity=quantity)
+            moltin.add_cart_item, itemId=itemId, quantity=quantity, cartId=cartId)
         if ('errors' in req or 'error' in req):
             print(req)
             abort(500)
@@ -286,7 +286,7 @@ def confirmation():
         }
     }
 
-    json = moltin.solidRequest(moltin.checkout, cartId=cartId)
+    json = moltin.solidRequest(moltin.checkout, cartId=cartId, orderData=json)
     orderId = json['data']['id']
 
     # authorize payment on moltin
