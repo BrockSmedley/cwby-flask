@@ -6,3 +6,4 @@ py-solc
 flask-talisman
 flask-session
 redis
+flask-mail

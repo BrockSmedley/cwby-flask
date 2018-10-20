@@ -7,34 +7,55 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="address1">Address 1</label>
-                        <input type="text" class="form-control" id="address1" required>
+                        <input type="text" class="form-control" name="address1" required>
                     </div>
                     <div class="form-group">
                         <label for="address2">Address 2</label>
-                        <input type="text" class="form-control" id="address2">
+                        <input type="text" class="form-control" name="address2">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="city">City</label>
+                            <input type="text" class="form-control" name="city" required>
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label for="state">State</label>
+                            <input type="text" class="form-control" name="state" required>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="zip">Zip Code</label>
+                            <input type="text" class="form-control" name="zip" required>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="city">City</label>
-                        <input type="text" class="form-control" id="city" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="state">State</label>
-                        <input type="text" class="form-control" id="state" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="zip">Zip Code</label>
-                        <input type="text" class="form-control" id="zip" required>
+                        <label for="country">Country</label>
+                        <input type="text" class="form-control" name="country" required>
                     </div>
                     <input type="hidden" id="cartId" name="cartId" value="{{cartId}}">
                 </div>
                 <div class="col-md-6">
-                        <input type="email" class="form-control" placeholder="Email address" aria-label="Email address" aria-describedby="email-address">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="firstname">First Name</label>
+                            <input type="text" name="firstname" class="form-control" aria-label="First Name" aria-describedby="first-name" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="lastname">Last Name</label>
+                            <input type="text" name="lastname" class="form-control" aria-label="Last Name" aria-describedby="last-name" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" name="email" class="form-control" aria-label="Email address" aria-describedby="email-address" required>
+                    </div>
+                    <div class="form-group">    
                         <button class="btn btn-outline-secondary" type="submit" id="button_buy">
                         <span style="margin-right:20px" 
                             class="glyphicon glyphicon-shopping-cart"
                             aria-hidden="true">
                         </span>
                         Checkout</button>
+                    </div>
                 </div>
             </form>
         </div>

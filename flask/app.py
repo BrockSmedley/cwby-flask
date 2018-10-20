@@ -1,6 +1,7 @@
 import os
 import sys
 from flask import Flask, render_template, request, redirect, send_from_directory, url_for, abort, session, escape
+from flask_mail import Message, Mail
 from sesh import RedisSessionInterface
 import requests
 import stripe
@@ -8,6 +9,7 @@ import binascii
 import redis
 import secrets
 from flask_talisman import Talisman
+from moltin import moltin
 
 import ethio
 import sesh
@@ -20,6 +22,8 @@ SUPPORT_EMAIL = "damonsmedley12@gmail.com"
 MOLTIN_SID = '1884465437547168601'
 MOLTIN_CID = 'x60kAvxYDej5b3sabMWHy08xi0Z24S6CYJeoaaGouZ'
 MOLTIN_CSC = 'db2gPRaGP9zDhBoP1bUf3U4uPG3dxwlsyJSkKzFi7C'
+
+moltin.config({'cid': MOLTIN_CID, 'csc': MOLTIN_CSC})
 
 csp = {
     'default-src': [
@@ -47,7 +51,17 @@ stripe.api_key = stripe_keys['secret_key']
 
 # Construct app
 app = Flask(__name__, static_url_path='')
+mail = Mail(app)
 app.session_interface = RedisSessionInterface()
+
+# configure mail
+app.config['MAIL_SERVER'] = '172.70.0.5'
+#app.config['MAIL_USERNAME'] = 'winston'
+#app.config['MAIL_PASSWORD'] = 'smoke'
+app.config['MAIL_DEFAULT_SENDER'] = 'winston@jeeves'
+
+mail.init_app(app)
+
 # TODO: Enforce CSP
 # TODO: Pimp out config (http://flask.pocoo.org/docs/1.0/config/)
 # Talisman(app, force_https=force_https, content_security_policy=csp)
@@ -68,32 +82,14 @@ def getKey():
         return res
 
 
-def moltinHeader():
-    res = session.get('moltinKey', 'not set')
-    if (res == 'not set'):
-        auth_header = authMoltin()
-        return session.get('moltinKey', 'error')
-    else:
-        return res
-
-
-def authMoltin():
-    moltin_auth_url = "https://api.moltin.com/oauth/access_token"
-
-    moltin_auth_body = {'client_id': MOLTIN_CID,
-                        'client_secret': MOLTIN_CSC, 'grant_type': "client_credentials"}
-
-    auth_req = requests.post(moltin_auth_url, data=moltin_auth_body)
-    auth_resp = auth_req.json()
-
-    auth_token_type = auth_resp['token_type']
-    auth_token = auth_resp['access_token']
-
-    auth = "%s %s" % (auth_token_type, auth_token)
-    auth_header = {'Authorization': auth}
-    print(auth_header)
-    session['moltinKey'] = auth_header
-    return "OK"
+def sendEmail(recipient, subject, message=None, html=None):
+    # send notice to owner
+    msg = Message(subject=subject, recipients=[recipient])
+    if (message):
+        msg.body = message
+    if (html):
+        msg.html = html
+    mail.send(msg)
 
 
 # APP ROUTES
@@ -120,14 +116,14 @@ def favicon():
 
 @app.route('/products', methods=['GET'])
 def products():
-    url = "https://api.moltin.com/v2/products"
-    productsRequest = requests.get(
-        url, headers=moltinHeader())
-    jdata = productsRequest.json()
+    jdata = moltin.solidRequest(moltin.get_products)
 
-    if ('errors' in jdata):
+    if 'error' in jdata:  # my error flag
+        print(jdata['error'], file=sys.stderr)
+        abort(500)
+    if ('errors' in jdata):  # moltin's error flag
         print(jdata['errors'], file=sys.stderr)
-        abort(404)
+        abort(400)
 
     images = {}
     shit = []
@@ -138,9 +134,8 @@ def products():
             shit.append(d)
         elif ("main_image" in d["relationships"]):
             imgId = d['relationships']['main_image']['data']['id']
-            imgReq = requests.get(
-                "https://api.moltin.com/v2/files/%s" % imgId, headers=moltinHeader())
-            imgJson = imgReq.json()
+
+            imgJson = moltin.solidRequest(moltin.get_file, imgId=imgId)
             print("IMGJSON: %s" % str(imgJson))
             imgUrl = imgJson['data']['link']['href']
             print(imgUrl)
@@ -156,13 +151,7 @@ def products():
 # product description page
 @app.route('/product/<pid>', methods=['GET'])
 def product(pid):
-    # fetch data from DB to build product page with pid
-    url = "https://api.moltin.com/v2/products/%s" % str(pid)
-
-    productRequest = requests.get(
-        url, headers=moltinHeader())
-
-    jdata = productRequest.json()
+    jdata = moltin.solidRequest(moltin.get_product, productId=pid)
 
     if ('errors' in jdata):
         print(jdata['errors'], file=sys.stderr)
@@ -172,17 +161,12 @@ def product(pid):
     #print(jdata, file=sys.stderr)
     productData = jdata['data']
     metaData = productData['meta']
-
     name = productData['name']
     description = productData['description']
     price = productData['price'][0]['amount']
+    imgId = productData['relationships']['main_image']['data']['id']
 
-    print(productData, file=sys.stderr)
-
-    imageId = productData['relationships']['main_image']['data']['id']
-    url = "https://api.moltin.com/v2/files/%s" % imageId
-    imgReq = requests.get(url, headers=moltinHeader())
-    imgResult = imgReq.json()
+    imgResult = moltin.solidRequest(moltin.get_file, imgId=imgId)
     imgUrl = imgResult['data']['link']['href']
 
     if (metaData['stock']['availability'] != "in-stock"):
@@ -242,15 +226,12 @@ def cart():
         # add item to cart
         itemId = request.form['id']
         quantity = request.form['quantity']
-        url = "https://api.moltin.com/v2/carts/%s/items" % cartId
-        json = {"data": {"id": itemId, "type": "cart_item",
-                         "quantity": int(quantity)}}
-        req = requests.post(url, json=json, headers=moltinHeader())
+        req = moltin.solidRequest(
+            moltin.add_cart_item, itemId=itemId, quantity=quantity)
+        print(req)
 
     # retrieve cart items
-    url = "https://api.moltin.com/v2/carts/%s/items" % cartId
-    req = requests.get(url, headers=moltinHeader())
-    items = req.json()
+    items = moltin.solidRequest(moltin.get_cart_items, cartId=cartId)
 
     cost = 0
     for i in items['data']:
@@ -272,55 +253,63 @@ def shipping():
 @app.route('/confirmation', methods=["POST"])
 def confirmation():
     cartId = request.form['cartId']
+    address1 = request.form['address1']
+    address2 = request.form['address2']
+    city = request.form['city']
+    state = request.form['state']
+    zipcode = request.form['zip']
+    country = request.form['country']
+    firstname = request.form['firstname']
+    lastname = request.form['lastname']
+    email = request.form['email']
+
     json = {
         "data": {
             "customer": {
-                "email": "john@moltin.com",
-                "name": "John Doe"
+                "email": email,
+                "name": ("%s %s" % (firstname, lastname))
             },
             "billing_address": {
-                "first_name": "John",
-                "last_name": "Doe",
-                "company_name": "Moltin",
-                "line_1": "2nd Floor British India House",
-                "line_2": "15 Carliol Square",
-                "city": "Newcastle upon Tyne",
-                "postcode": "NE1 6UF",
-                "county": "Tyne & Wear",
-                "country": "UK"
+                "first_name": firstname,
+                "last_name": lastname,
+                "company_name": "NA",
+                "line_1": address1,
+                "line_2": address2,
+                "city": city,
+                "postcode": zipcode,
+                "county": "NA",
+                "country": country
             },
             "shipping_address": {
-                "first_name": "John",
-                "last_name": "Doe",
-                "company_name": "Moltin",
-                "phone_number": "(555) 555-1234",
-                "line_1": "2nd Floor British India House",
-                "line_2": "15 Carliol Square",
-                "city": "Newcastle upon Tyne",
-                "postcode": "NE1 6UF",
-                "county": "Tyne & Wear",
-                "country": "UK",
-                "instructions": "Leave in porch"
+                "first_name": firstname,
+                "last_name": lastname,
+                "company_name": "NA",
+                "line_1": address1,
+                "line_2": address2,
+                "city": city,
+                "postcode": zipcode,
+                "county": "NA",
+                "country": country
             }
         }
     }
     print(json)
 
-    url = "https://api.moltin.com/v2/carts/%s/checkout" % cartId
-    req = requests.post(url, json=json, headers=moltinHeader())
-
-    json = req.json()
+    json = moltin.solidRequest(moltin.checkout, cartId=cartId)
     orderId = json['data']['id']
 
     # authorize payment on moltin
-    url = "https://api.moltin.com/v2/orders/%s/payments" % orderId
-    json = {"data": {"gateway": "manual", "method": "authorize"}}
-    req = requests.post(url, json=json, headers=moltinHeader())
+    moltin.ensure_auth()
+    req = moltin.authorize_payment(orderId)
 
     # delete cart after payment
     if (req.status_code == 200):
-        url = "https://api.moltin.com/v2/carts/%s" % cartId
-        requests.delete(url, headers=moltinHeader())
+        moltin.ensure_auth()
+        moltin.delete_cart(cartId)
+
+        # email user with confirmation
+        sendEmail(email, "Order received",
+                  "Thank you for your purchase. Your gear will ship as soon as your payment is received.")
 
         return render_template("confirmation.jinja", code=200)
     else:
