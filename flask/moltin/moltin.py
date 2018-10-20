@@ -16,10 +16,8 @@ def config(keydata):
 def auth_header():
     res = session.get('moltinKey', 'not set')
     if (res == 'not set'):
-        print("GENERATING NEW FRINKIN KEY.")
         auth = auth_moltin()
     else:
-        print("NICE: %s" % res)
         auth = res
 
     return auth
@@ -103,14 +101,11 @@ def get_settings():
 # returns error after 3 failed auth attempts
 def solidRequest(function, **kwargs):
     req = function(**kwargs)
-    print(req)
-    print(session)
 
     # if invalid key
     i = 0
     try:
         while (req.status_code == 401 and i < 3):
-            print("gay fish")
             # renew key
             auth_moltin()
             req = function(**kwargs)

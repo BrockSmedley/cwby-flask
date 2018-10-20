@@ -136,9 +136,7 @@ def products():
             imgId = d['relationships']['main_image']['data']['id']
 
             imgJson = moltin.solidRequest(moltin.get_file, imgId=imgId)
-            print("IMGJSON: %s" % str(imgJson))
             imgUrl = imgJson['data']['link']['href']
-            print(imgUrl)
             images[d['id']] = imgUrl
 
     # remove draft items
@@ -157,8 +155,6 @@ def product(pid):
         print(jdata['errors'], file=sys.stderr)
         abort(404)
 
-    # print("JDATA")
-    #print(jdata, file=sys.stderr)
     productData = jdata['data']
     metaData = productData['meta']
     name = productData['name']
@@ -185,16 +181,12 @@ def charge():
 
     try:
         customer = stripe.Customer.create(source=request.form['stripeToken'])
-
-        # print(customer, file=sys.stderr)
-
         charge = stripe.Charge.create(
             customer=customer.id,
             amount=amount,
             currency='usd',
             description='CWBY web payment'
         )
-        # print(charge, file=sys.stderr)
 
         if (charge['outcome']['network_status'] != "approved_by_network"):
             # transaction error
@@ -205,8 +197,6 @@ def charge():
             ethResult = ''
             try:
                 ethResult = ethio.orderCoins(coins, address)
-                # print(ethio.getProvider(), file=sys.stderr)
-                # print(ethResult, file=sys.stderr)
             except Exception as e:
                 print("something went wrong with the ETH transaction\n%s" %
                       str(e), file=sys.stderr)
@@ -228,7 +218,9 @@ def cart():
         quantity = request.form['quantity']
         req = moltin.solidRequest(
             moltin.add_cart_item, itemId=itemId, quantity=quantity)
-        print(req)
+        if ('errors' in req or 'error' in req):
+            print(req)
+            abort(500)
 
     # retrieve cart items
     items = moltin.solidRequest(moltin.get_cart_items, cartId=cartId)
@@ -293,7 +285,6 @@ def confirmation():
             }
         }
     }
-    print(json)
 
     json = moltin.solidRequest(moltin.checkout, cartId=cartId)
     orderId = json['data']['id']
