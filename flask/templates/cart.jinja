@@ -1,6 +1,7 @@
 {% extends "layout.jinja" %}
 {% block content %}
     <div class="container">
+        {% if items['data']|length > 0 %}
         <div class="row" style="margin-bottom: 8px;">
             <div class="col-md-8">
                 {% for i in items['data'] %}
@@ -36,6 +37,12 @@
                 </div>
             </div>
         </div>
+        {% else %}
+        <div class="jumbotron">
+            <h3>Your cart is empty :(</h3>
+            <a href="/products"><h4>Browse our product here</h4></a>
+        </div>
+        {% endif %}
     </div>
 
     

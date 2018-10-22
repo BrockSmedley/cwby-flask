@@ -103,7 +103,7 @@ def index():
 
 @app.route('/_contractAddress')
 def _contractAddress():
-    return ethio.getContractAddress()
+    return ethio.CONTRACT_ADDRESS
 
 
 @app.route('/favicon.ico')
@@ -178,6 +178,8 @@ def charge():
 
     try:
         customer = stripe.Customer.create(source=request.form['stripeToken'])
+        email = customer.email
+        db.setCustomerAddress(email, address)
         charge = stripe.Charge.create(
             customer=customer.id,
             amount=amount,
@@ -252,11 +254,14 @@ def confirmation():
     lastname = request.form['lastname']
     email = request.form['email']
 
+    ethAddress = db.getCustomerAddress(email)
+
     json = {
         "data": {
             "customer": {
                 "email": email,
-                "name": ("%s %s" % (firstname, lastname))
+                "name": ("%s %s" % (firstname, lastname)),
+                "eth_address": ethAddress
             },
             "billing_address": {
                 "first_name": firstname,
@@ -289,7 +294,7 @@ def confirmation():
     orderId = customer['data']['id']
 
     # store order info in local DB
-    db.newOrder(customer, orderId)
+    db.newOrder(orderId, json)
 
     # authorize payment on moltin
     moltin.ensure_auth()

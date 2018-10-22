@@ -17,66 +17,64 @@ CONTRACT_ADDRESS = '0x492934308E98b590A626666B703A6dDf2120e85e'
 # '0x731a10897d267e19B34503aD902d0A29173Ba4B1'
 
 
-def compileTestContract():
-    # Solidity source code
-    contract_src = '''
-		pragma solidity ^0.4.0;
+# def compileTestContract():
+#     # Solidity source code
+#     contract_src = '''
+# 		pragma solidity ^0.4.0;
 
-		contract Greeter {
-				string public greeting;
+# 		contract Greeter {
+# 				string public greeting;
 
-				function Greeter(){
-						greeting = "Howdy";
-				}
+# 				function Greeter(){
+# 						greeting = "Howdy";
+# 				}
 
-				function setGreeting(string _greeting) public {
-						greeting = _greeting;
-				}
+# 				function setGreeting(string _greeting) public {
+# 						greeting = _greeting;
+# 				}
 
-				function greet() constant returns (string) {
-						return greeting;
-				}
-		}
-		'''
+# 				function greet() constant returns (string) {
+# 						return greeting;
+# 				}
+# 		}
+# 		'''
 
-    return compile_source(contract_src)
+#     return compile_source(contract_src)
 
-# compiles and deploys a test contract
-# only works on testRPC b/c transactions need to be signed
+# # compiles and deploys a test contract
+# # only works on testRPC b/c transactions need to be signed
+# def buildTestContract():
+#     PROVIDER = TestRPCProvider()
 
+#     compiled_sol = compileTestContract()
+#     contract_io = compiled_sol['<stdin>:Greeter']
 
-def buildTestContract():
-    PROVIDER = TestRPCProvider()
+#     # web3.py instance
+#     w3i = Web3(PROVIDER)
 
-    compiled_sol = compileTestContract()
-    contract_io = compiled_sol['<stdin>:Greeter']
+#     # instantiate and deploy contract
+#     contract = w3i.eth.contract(
+#         abi=contract_io['abi'], bytecode=contract_io['bin'])
 
-    # web3.py instance
-    w3i = Web3(PROVIDER)
+#     # get tx hash from deployed contract
+#     tx_hash = contract.deploy(
+#         transaction={'from': w3i.eth.accounts[0], 'gas': 420000})
 
-    # instantiate and deploy contract
-    contract = w3i.eth.contract(
-        abi=contract_io['abi'], bytecode=contract_io['bin'])
+#     # get tx receipt from deployed contract
+#     tx_receipt = w3i.eth.getTransactionReceipt(tx_hash)
+#     contract_address = tx_receipt['CONTRACT_ADDRESS']
 
-    # get tx hash from deployed contract
-    tx_hash = contract.deploy(
-        transaction={'from': w3i.eth.accounts[0], 'gas': 420000})
+#     # contract instance in concise mode
+#     abi = contract_io['abi']
+#     contract_instance = w3i.eth.contract(
+#         address=contract_address, abi=abi, ContractFactoryClass=ConciseContract)
 
-    # get tx receipt from deployed contract
-    tx_receipt = w3i.eth.getTransactionReceipt(tx_hash)
-    contract_address = tx_receipt['contractAddress']
-
-    # contract instance in concise mode
-    abi = contract_io['abi']
-    contract_instance = w3i.eth.contract(
-        address=contract_address, abi=abi, ContractFactoryClass=ConciseContract)
-
-    # getters & setters for web3.eth.contract object
-    print('Contract value: {}'.format(contract_instance.greet()))
-    contract_instance.setGreeting(
-        'd\'herroo', transact={'from': w3i.eth.accounts[0]})
-    print('Setting new greeting')
-    return('Contract value: {}'.format(contract_instance.greet()))
+#     # getters & setters for web3.eth.contract object
+#     print('Contract value: {}'.format(contract_instance.greet()))
+#     contract_instance.setGreeting(
+#         'd\'herroo', transact={'from': w3i.eth.accounts[0]})
+#     print('Setting new greeting')
+#     return('Contract value: {}'.format(contract_instance.greet()))
 
 
 # TODO: Implement parity host in Docker; don't expose this to host network in prod!
@@ -90,7 +88,7 @@ def getProvider(host=None):
     return Web3.HTTPProvider(httpHost+":8545", request_kwargs={'timeout': 10})
 
 
-def abi():
+def ABI():
     return '''
 		[
 	{
@@ -276,12 +274,17 @@ def abi():
 		'''
 
 
-def getContractAddress():
-    # TODO: make this a route to be accessed by js
-    return CONTRACT_ADDRESS
+def getContract():
+    # get web3 interface
+    provider = getProvider(provider)
+    w3 = Web3(provider)
+
+    return w3.eth.contract(address=CONTRACT_ADDRESS, abi=ABI())
 
 
-def orderCoins(numCoins, address_receiver, provider=None):
+# sends coins from API_ADDRESS to address_receiver
+# this means API_ADDRESS must be stocked with coins
+def orderCoins(numCoins, address_receiver, provider):
     # get web3 interface
     provider = getProvider(provider)
     w3 = Web3(provider)
@@ -290,7 +293,7 @@ def orderCoins(numCoins, address_receiver, provider=None):
     RECEIVER_ADDRESS = Web3.toChecksumAddress(address_receiver.lower())
 
     # address of token
-    CONTRACT_ADDRESS = getContractAddress()
+    CONTRACT_ADDRESS = CONTRACT_ADDRESS
 
     # read private key from secret file
     keyfile = open('.ethkey', 'r')
@@ -315,7 +318,7 @@ def orderCoins(numCoins, address_receiver, provider=None):
     coins = int(numCoins)
 
     # get contract instance
-    contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abi())
+    contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=ABI())
 
     # build transaction
     tx = contract.functions.transfer(RECEIVER_ADDRESS, coins).buildTransaction(
