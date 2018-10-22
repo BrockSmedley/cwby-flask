@@ -68,8 +68,11 @@
 
             window.showOverlay();
 
-            txRes = await spendTokens(cost);
-            console.log("txRes: " + txRes);
+            var txRes = await spendTokens(cost).then(function(){
+                console.log("txRes: " + txRes);
+            });
+            
+            //sessionStorage.setItem('txRes', txRes);
         }
         $(document).ready(function () {
             //-- Click on detail
@@ -88,7 +91,7 @@
             // click on buy
             $("#button_buy").on("click", function () {
                 buy();
-                //$("#button_buy").attr("disabled", true);
+                //$(this).attr("disabled", true);
             });
         });
         // INITIALIZE WEB3 using web3io.js

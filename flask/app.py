@@ -241,6 +241,14 @@ def shipping():
     return render_template("shipping.jinja", cartId=cartId, cost=cost)
 
 
+def _authorize(orderId):
+    # authorize payment on moltin
+    moltin.ensure_auth()
+    req = moltin.authorize_payment(orderId)
+
+    return req
+
+
 @app.route('/confirmation', methods=["POST"])
 def confirmation():
     cartId = request.form['cartId']
@@ -260,8 +268,7 @@ def confirmation():
         "data": {
             "customer": {
                 "email": email,
-                "name": ("%s %s" % (firstname, lastname)),
-                "eth_address": ethAddress
+                "name": ("%s %s" % (firstname, lastname))
             },
             "billing_address": {
                 "first_name": firstname,
@@ -296,22 +303,18 @@ def confirmation():
     # store order info in local DB
     db.newOrder(orderId, json)
 
-    # authorize payment on moltin
-    moltin.ensure_auth()
-    req = moltin.authorize_payment(orderId)
+    # authorize payment manually
+    req = _authorize(orderId)
 
     # delete cart after payment
-    if (req.status_code == 200):
-        moltin.ensure_auth()
-        moltin.delete_cart(cartId)
+    moltin.ensure_auth()
+    moltin.delete_cart(cartId)
 
-        # email user with confirmation
-        sendEmail(email, "Order received",
-                  "Thank you for your purchase. Your gear will ship as soon as your payment is received.")
+    # email user with confirmation
+    sendEmail(email, "Order received",
+              "Thank you for your purchase. Your gear will ship as soon as your payment is received.")
 
-        return render_template("confirmation.jinja", code=200)
-    else:
-        return render_template("error.jinja", code=req.status_code, status=req.text)
+    return render_template("confirmation.jinja", orderid=orderId, code=200)
 
 
 @app.route('/price')

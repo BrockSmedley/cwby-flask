@@ -7224,16 +7224,15 @@ var spendTokens = function (cost) {
             // attempt transaction
             if (balance >= _cost) {
                 // spend the tokens
-                resolve (tokens.transfer(_to=getContractAddress(), _value=_cost, function(error, result){
+                resolve(tokens.transfer(_to=getContractAddress(), _value=_cost, function(error, result){
                     if (!error){
                         // log tx hash if transaction succeeded
-                        hideOverlay();
                         console.log("txResult: " + result);
-                        return result;
+                        resolve(result);
                     }
                     else {
                         console.error(error);
-                        return 0;
+                        resolve(0);
                     }
                 }));
             }
