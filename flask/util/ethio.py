@@ -293,9 +293,6 @@ def orderCoins(numCoins, address_receiver, provider=None):
     # convert receiver address to checksum address
     RECEIVER_ADDRESS = Web3.toChecksumAddress(address_receiver.lower())
 
-    # address of token
-    CONTRACT_ADDRESS = CONTRACT_ADDRESS
-
     # read private key from secret file
     keyfile = open('.ethkey', 'r')
     PRIVATE_KEY_API = keyfile.readline().strip('\n')
