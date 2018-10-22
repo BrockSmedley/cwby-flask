@@ -61,6 +61,16 @@
         </div>
     </div>
     <script type="text/javascript">
+        async function buy(){
+            // get product cost
+            cost='{{cost}}';
+            console.log(cost);
+
+            window.showOverlay();
+
+            txRes = await spendTokens(cost);
+            console.log("txRes: " + txRes);
+        }
         $(document).ready(function () {
             //-- Click on detail
             $("ul.menu-items > li").on("click", function () {
@@ -77,16 +87,7 @@
 
             // click on buy
             $("#button_buy").on("click", function () {
-                // get product cost
-                cost='{{cost}}';
-                console.log(cost);
-
-                window.showOverlay();
-
-
-                if (spendTokens(cost) == 0){
-                    alert("Please confirm the transaction in MetaMask.");
-                }
+                buy();
                 //$("#button_buy").attr("disabled", true);
             });
         });

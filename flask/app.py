@@ -2,17 +2,14 @@ import os
 import sys
 from flask import Flask, render_template, request, redirect, send_from_directory, url_for, abort, session, escape
 from flask_mail import Message, Mail
-from sesh import RedisSessionInterface
 import requests
 import stripe
 import binascii
 import redis
 import secrets
 from flask_talisman import Talisman
-from moltin import moltin
 
-import ethio
-import sesh
+from util import moltin, ethio, sesh, db
 
 
 # CONSTANTS ################################
@@ -52,7 +49,7 @@ stripe.api_key = stripe_keys['secret_key']
 # Construct app
 app = Flask(__name__, static_url_path='')
 mail = Mail(app)
-app.session_interface = RedisSessionInterface()
+app.session_interface = sesh.RedisSessionInterface()
 
 # configure mail
 app.config['MAIL_SERVER'] = '172.70.0.5'
@@ -286,8 +283,13 @@ def confirmation():
         }
     }
 
-    json = moltin.solidRequest(moltin.checkout, cartId=cartId, orderData=json)
-    orderId = json['data']['id']
+    # send order request to moltin
+    customer = moltin.solidRequest(
+        moltin.checkout, cartId=cartId, orderData=json)
+    orderId = customer['data']['id']
+
+    # store order info in local DB
+    db.newOrder(customer, orderId)
 
     # authorize payment on moltin
     moltin.ensure_auth()

@@ -7203,7 +7203,7 @@ const getContractAddress = function () {
 }
 
 // spend CWBY coins from user account
-const spendTokens = function (cost) {
+var spendTokens = function (cost) {
     showOverlay();
     // get user address
     const address = web3.eth.defaultAccount;
@@ -7216,7 +7216,7 @@ const spendTokens = function (cost) {
 
     // query user balance
     var balance = -1;
-    tokens.balanceOf(address, function (error, result) {
+    return new Promise(resolve => tokens.balanceOf(address, function (error, result) {
         if (!error){
             console.log("balance: " + result);
             console.log("Cost: " + cost + " CWBY");
@@ -7224,16 +7224,18 @@ const spendTokens = function (cost) {
             // attempt transaction
             if (balance >= _cost) {
                 // spend the tokens
-                tokens.transfer(_to=getContractAddress(), _value=_cost, function(error, result){
+                resolve (tokens.transfer(_to=getContractAddress(), _value=_cost, function(error, result){
                     if (!error){
                         // log tx hash if transaction succeeded
                         hideOverlay();
-                        console.log(result);
+                        console.log("txResult: " + result);
+                        return result;
                     }
                     else {
                         console.error(error);
+                        return 0;
                     }
-                })
+                }));
             }
             else {
                 console.log("Balance insufficient.");
@@ -7244,7 +7246,7 @@ const spendTokens = function (cost) {
         else{
             console.error(error);
         }
-    });
+    }));
 
     // return 0 if tx failed
     return 0;
