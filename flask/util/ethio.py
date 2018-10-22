@@ -2,6 +2,7 @@ import json
 import web3
 import sys
 import time
+import asyncio
 
 from web3 import Web3, HTTPProvider, TestRPCProvider
 from solc import compile_source
@@ -11,7 +12,7 @@ from web3.contract import ConciseContract
 # TEST API ACCOUNT INFO
 # Private key: a5fd26e449e7068059d4e139465205963d3355ee2a9f45d9e7d4635b4524cda3
 # Public key:  a074c22e55610001e52b567f887dddd62b1874981a46d6cf1db0e7f2fba00a91a62576bd96fab6e558a1a05b114d06e92996f14bcf244d3232ffd297fa951856
-#Address:     0x85D519832Eee2ea676419F896B6E0A1e83a28CEA
+# Address:     0x85D519832Eee2ea676419F896B6E0A1e83a28CEA
 
 CONTRACT_ADDRESS = '0x492934308E98b590A626666B703A6dDf2120e85e'
 # '0x731a10897d267e19B34503aD902d0A29173Ba4B1'
@@ -274,7 +275,7 @@ def ABI():
 		'''
 
 
-def getContract():
+def getContract(provider=None):
     # get web3 interface
     provider = getProvider(provider)
     w3 = Web3(provider)
@@ -284,7 +285,7 @@ def getContract():
 
 # sends coins from API_ADDRESS to address_receiver
 # this means API_ADDRESS must be stocked with coins
-def orderCoins(numCoins, address_receiver, provider):
+def orderCoins(numCoins, address_receiver, provider=None):
     # get web3 interface
     provider = getProvider(provider)
     w3 = Web3(provider)
@@ -308,11 +309,11 @@ def orderCoins(numCoins, address_receiver, provider):
     nonce = w3.eth.getTransactionCount(API_ADDRESS)
 
     # sanity check
-    #print ("Contract address: %s" % CONTRACT_ADDRESS, file=sys.stderr)
-    #print ("Recipient address: %s" % RECEIVER_ADDRESS, file=sys.stderr)
-    #print ("API address: %s" % API_ADDRESS, file=sys.stderr)
-    #print ("Nonce: %s" % str(nonce), file=sys.stderr)
-    #print ("Coins: %s" % numCoins, file=sys.stderr)
+    # print ("Contract address: %s" % CONTRACT_ADDRESS, file=sys.stderr)
+    # print ("Recipient address: %s" % RECEIVER_ADDRESS, file=sys.stderr)
+    # print ("API address: %s" % API_ADDRESS, file=sys.stderr)
+    # print ("Nonce: %s" % str(nonce), file=sys.stderr)
+    # print ("Coins: %s" % numCoins, file=sys.stderr)
 
     # convert numCoins to int
     coins = int(numCoins)
@@ -330,10 +331,31 @@ def orderCoins(numCoins, address_receiver, provider):
          'from': API_ADDRESS, 'nonce': nonce,
          }
     )
-    #print (tx, file=sys.stderr)
+    # print (tx, file=sys.stderr)
 
     # sign tx locally
     signed_tx = w3.eth.account.signTransaction(tx, private_key=PRIVATE_KEY_API)
     result = w3.eth.sendRawTransaction(signed_tx.rawTransaction)
 
     return result.hex()
+
+
+def handlePayment(customerAddress):
+    provider = getProvider()
+    w3 = Web3(provider)
+    contract = getContract()
+
+    block = hex(w3.eth.blockNumber+1)
+    print(block)
+
+    payment_logs = contract.events.Transfer.createFilter(
+        fromBlock=str(block), argument_filters={'from': customerAddress})
+
+    paid = False
+    while (not paid):
+        payments = payment_logs.get_all_entries()
+        if (len(payments) > 0):
+            print(payments)
+            paid = True
+
+    return payments

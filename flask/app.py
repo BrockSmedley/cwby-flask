@@ -7,6 +7,7 @@ import stripe
 import binascii
 import redis
 import secrets
+import asyncio
 from flask_talisman import Talisman
 
 from util import moltin, ethio, sesh, db
@@ -302,6 +303,9 @@ def confirmation():
 
     # store order info in local DB
     db.newOrder(orderId, json)
+
+    # subscribe to transfer event w/ customer address filter
+    ethio.handlePayment(ethAddress)
 
     # authorize payment manually
     req = _authorize(orderId)
