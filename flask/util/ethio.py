@@ -323,8 +323,7 @@ def orderCoins(numCoins, address_receiver, provider=None):
         {'chainId': None,
          'gas': 70000,
          # w3.toWei('1', 'wei'), #TODO: use estimateGas(?)
-         'gasPrice': 1,
-         'value': w3.toHex(w3.toWei('0', 'ether')),
+         'gasPrice': 4,
          'from': API_ADDRESS, 'nonce': nonce,
          }
     )
