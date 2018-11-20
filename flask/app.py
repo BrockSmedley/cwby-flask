@@ -18,7 +18,7 @@ from util import moltin, ethio, sesh, db
 FORCE_HTTPS = False
 SUPPORT_EMAIL = "damonsmedley12@gmail.com"
 
-CSP_nonce_in = ['script-src', 'style-src']
+CSP_nonce_in = ['script-src', 'style-src', 'connect-src', 'frame-src']
 CSP = {
     'default-src': [
         '\'self\''
@@ -86,7 +86,7 @@ app.config['CSRF_COOKIE_SECURE'] = True
 # app.config['CSRF_COOKIE_PATH']
 # app.config['CSRF_COOKIE_DOMAIN']
 # app.config['CSRF_COOKIE_SAMESITE']
-#app.config['CSRF_DISABLE'] = True
+app.config['CSRF_DISABLE'] = True
 csrf = SeaSurf(app)
 
 # Configure mail
