@@ -97,14 +97,36 @@
             });
         });
         // INITIALIZE WEB3 using web3io.js
-        window.addEventListener('load', function () {
-        // check for web3 injection
-        if (typeof (web3) !== 'undefined') {
-            startApp(web3);
-        } else {
-            // get user to install metamask
-            window.alert("web3 is undefined. Please install Metamask.");
-        }
+        window.addEventListener('load', async () => {
+            // check for web3 injection
+            if (window.ethereum){
+                alert("window.ethereum is good.");
+                try{
+                    // request account access if needed
+                    await ethereum.enable();
+                    // -- accounts now exposed
+                    console.log("ETH accounts authorized for payment!");
+
+                    // initialize payment system
+                    startApp(web3);
+                }
+                catch (error){
+                    // user denied account access
+                    alert("You must allow account access from Metamask to purchase items.\nPlease refresh the page and allow access.");
+                }
+            }
+            else if (window.web3){
+                window.web3 = new Web3(web3.currentProvider);
+                // -- accounts always exposed
+                console.log("global web3 found.");
+
+                // initialize payment system
+                startApp(web3);
+            }
+            else {
+                // get user to install metamask
+                window.alert("Non-ethereum browser detected. We recommend Metamask!");
+            }
         });
     </script>
 {% endblock %}
