@@ -18,9 +18,10 @@ FORCE_HTTPS = False
 SUPPORT_EMAIL = "damonsmedley12@gmail.com"
 
 # TODO: read these from files
-MOLTIN_SID = '1884465437547168601'
-MOLTIN_CID = 'x60kAvxYDej5b3sabMWHy08xi0Z24S6CYJeoaaGouZ'
-MOLTIN_CSC = 'db2gPRaGP9zDhBoP1bUf3U4uPG3dxwlsyJSkKzFi7C'
+keyfile = open('.moltinkeys', 'r')
+MOLTIN_SID = keyfile.readline().strip('\n')
+MOLTIN_CID = keyfile.readline().strip('\n')
+MOLTIN_CSC = keyfile.readline().strip('\n')
 
 moltin.config({'cid': MOLTIN_CID, 'csc': MOLTIN_CSC})
 
@@ -60,8 +61,6 @@ secret_key = keyfile.readline().strip('\n')
 publishable_key = keyfile.readline().strip('\n')
 keyfile.close()
 stripe_keys = {
-    # TODO: Move these into system environment vars (or files)
-    # os.environ['VAR_NAME']
     'secret_key': secret_key,
     'publishable_key': publishable_key
 }

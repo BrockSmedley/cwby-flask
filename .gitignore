@@ -109,3 +109,5 @@ flask/static/node_modules
 flask/.stripekeys
 flask/.ethkey
 .vscode/settings.json
+flask/.moltinkeys
+flask/.flaskkey
