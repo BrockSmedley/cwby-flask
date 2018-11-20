@@ -17,6 +17,7 @@ from util import moltin, ethio, sesh, db
 force_https = False
 SUPPORT_EMAIL = "damonsmedley12@gmail.com"
 
+# TODO: read these from files
 MOLTIN_SID = '1884465437547168601'
 MOLTIN_CID = 'x60kAvxYDej5b3sabMWHy08xi0Z24S6CYJeoaaGouZ'
 MOLTIN_CSC = 'db2gPRaGP9zDhBoP1bUf3U4uPG3dxwlsyJSkKzFi7C'
@@ -65,6 +66,8 @@ mail.init_app(app)
 # Talisman(app, force_https=force_https, content_security_policy=csp)
 
 
+# helper functions ==========================================================
+
 def setKey():
     session['key'] = secrets.token_urlsafe()
 
@@ -90,7 +93,7 @@ def sendEmail(recipient, subject, message=None, html=None):
     mail.send(msg)
 
 
-# APP ROUTES
+# APP ROUTES ==================================================================
 @app.route('/')
 def index():
     if 'key' in session:
@@ -337,6 +340,7 @@ def support():
     return render_template('support.jinja', supportEmail=SUPPORT_EMAIL)
 
 
-# RUN THAT SHIT
+# RUN THAT  ===================================================================
 if __name__ == '__main__':
+    # TODO: disable debug
     app.run(debug=True, host='0.0.0.0', port=5000)
