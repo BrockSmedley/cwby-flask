@@ -82,12 +82,13 @@ app.session_interface = sesh.RedisSessionInterface()
 # CSRF prevention with SeaSurf
 app.config['CSRF_COOKIE_NAME'] = "CWBY_CSRF"
 app.config['CSRF_COOKIE_TIMEOUT'] = 2678400  # 31 days in seconds
-app.config['CSRF_COOKIE_SECURE'] = True
+app.config['CSRF_COOKIE_SECURE'] = FORCE_HTTPS
 # app.config['CSRF_COOKIE_PATH']
 # app.config['CSRF_COOKIE_DOMAIN']
 # app.config['CSRF_COOKIE_SAMESITE']
 app.config['CSRF_DISABLE'] = True
 csrf = SeaSurf(app)
+csrf.init_app(app)
 
 # Configure mail
 app.config['MAIL_SERVER'] = '172.70.0.5'
@@ -210,8 +211,11 @@ def product(pid):
         return render_template('product.jinja', name=name, description=description, cost=price, imgUrl=imgUrl, pid=pid)
 
 
-@app.route('/charge', methods=['POST'])
+@csrf.exempt  # charge only called by stripe, so it's exempt
+@app.route('/charge', methods=['POST', 'GET'])
 def charge():
+    if (request.method == 'GET'):
+        return redirect('/')
     # amount in cents
     amount = request.form['amount']
     dollars = request.form['dollars']
@@ -247,7 +251,7 @@ def charge():
             return render_template('charge.jinja', amount=amount, dollars=dollars, coins=coins, address=address, txid=ethResult)
     except Exception as e:
         print(e, file=sys.stderr)
-        return redirect("/#", code=302)
+        return redirect("/#", code=303)
 
 
 @app.route('/cart', methods=["GET", "POST"])
@@ -293,6 +297,8 @@ def _authorize(orderId):
 
 @app.route('/confirmation', methods=["POST"])
 def confirmation():
+    if (not request.form):
+        abort(400)
     cartId = request.form['cartId']
     address1 = request.form['address1']
     address2 = request.form['address2']
@@ -338,9 +344,13 @@ def confirmation():
     }
 
     # send order request to moltin
-    customer = moltin.solidRequest(
-        moltin.checkout, cartId=cartId, orderData=json)
-    orderId = customer['data']['id']
+    try:
+        customer = moltin.solidRequest(
+            moltin.checkout, cartId=cartId, orderData=json)
+        orderId = customer['data']['id']
+    except KeyError as e:
+        print("BAD refresh:\n%s" % e, file=sys.stderr)
+        return redirect('/')
 
     # store order info in local DB
     db.newOrder(orderId, json)
