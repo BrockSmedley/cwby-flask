@@ -4,7 +4,7 @@
     <div class="row">
         {% for i in products %}
             <div class="col-xs-4">
-                <div class="card" style="width: 18rem;">
+                <div class="card product-card">
                     {% if i['id'] in images %}
                         <img class="card-img-top img-thumbnail" src="{{images[i['id']]}}" alt="Card image cap" >
                     {% else %}
