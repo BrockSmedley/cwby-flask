@@ -23,8 +23,7 @@
             <label for="amountInput">Amount (CWBY)</label>
             <div class="row">
               <div class="col-xs-8">
-                <input type="number" class="form-control" id="amountInput" placeholder="10" onkeyup="setAmount()"
-                  required>
+                <input type="number" class="form-control" id="amountInput" placeholder="10" required>
               </div>
               <div class="col-xs-1">
                 <strong>Price: </strong>
@@ -35,7 +34,7 @@
           <div class="form-group">
             <label for="addressInput">ETH Address</label>
             <input type="text" class="form-control is-invalid" id="addressInput" placeholder="0xcb39f9322b21150833303453ec20aabef0817f90"
-              onkeyup="setAddress()" required>
+              required>
             <div>
               Please double check your ETH address before checking out.
             </div>
@@ -137,6 +136,13 @@
   window.addEventListener('popstate', function () {
     handler.close();
   });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    $("#amountInput").on('keyup', setAmount);
+    $("#addressInput").on('keyup', setAddress);
+  });
+
+  // hide the overlay if still visible
   hideOverlay();
 </script>
 
