@@ -4,14 +4,15 @@
     <div class="jumbotron container">
         <h1 class="display-4">Order received!</h1>
         <p class="lead">Your order has been processed successfully. We'll ship your gear out as soon as your payment is confirmed.</p>
+        {% if status %}
         <hr class="my-4">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <span>Shipping code: it'll get there...</span>
                     <span>{{status}}</span>
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 {% endblock %}
