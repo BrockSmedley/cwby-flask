@@ -52,3 +52,7 @@
 .product-card {
     width: 18rem;
 }
+
+.cart-row {
+    margin-bottom: 8px;
+}
