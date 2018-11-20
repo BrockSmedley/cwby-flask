@@ -7,3 +7,4 @@ flask-talisman
 flask-session
 redis
 flask-mail
+flask-seasurf

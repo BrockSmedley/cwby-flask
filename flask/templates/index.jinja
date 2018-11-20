@@ -41,9 +41,10 @@
             </div>
           </div>
           <button type="submit" class="btn btn-success btn-block" id="paymentButton">Purchase</button>
-<div class="alert alert-info">
-  To test a credit card transaction, use Card: 4242-4242-4242-4242 Expire: 01/21 CVV: 123
-</div>
+          <div class="alert alert-info">
+            To test a credit card transaction, use Card: 4242-4242-4242-4242 Expire: 01/21 CVV: 123
+          </div>
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         </form>
       </div>
     </div>

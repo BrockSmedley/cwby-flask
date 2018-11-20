@@ -9,6 +9,7 @@ import redis
 import secrets
 import asyncio
 from flask_talisman import Talisman
+from flask_seasurf import SeaSurf
 
 from util import moltin, ethio, sesh, db
 
@@ -72,10 +73,21 @@ stripe.api_key = stripe_keys['secret_key']
 # TODO: Pimp out config (http://flask.pocoo.org/docs/1.0/config/)
 app = Flask(__name__, static_url_path='')
 keyfile = open('.flaskkey', 'r')
-app.config['SECRET_KEY'] = keyfile.readline().strip('\n')
+#app.config['SECRET_KEY'] = keyfile.readline().strip('\n')
 keyfile.close()
 
+# session management with Redis
 app.session_interface = sesh.RedisSessionInterface()
+
+# CSRF prevention with SeaSurf
+app.config['CSRF_COOKIE_NAME'] = "CWBY_CSRF"
+app.config['CSRF_COOKIE_TIMEOUT'] = 2678400  # 31 days in seconds
+app.config['CSRF_COOKIE_SECURE'] = True
+# app.config['CSRF_COOKIE_PATH']
+# app.config['CSRF_COOKIE_DOMAIN']
+# app.config['CSRF_COOKIE_SAMESITE']
+#app.config['CSRF_DISABLE'] = True
+csrf = SeaSurf(app)
 
 # Configure mail
 app.config['MAIL_SERVER'] = '172.70.0.5'
