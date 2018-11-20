@@ -6,7 +6,7 @@ red = redis.StrictRedis(host=REDIS_HOST)
 
 
 def newOrder(orderId, customerData):
-    red.set('order:%s' % orderId, customerData)
+    red.set('order:%s' % orderId, str(customerData))
 
 
 def getOrder(orderId):
