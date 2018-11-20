@@ -36,3 +36,15 @@
     transform: translate(-50%, -60%);
     -ms-transform: translate(-50%, -50%);
 }
+
+.text-decoration-none {
+    text-decoration: none;
+}
+
+.cart-item-custom {
+    margin-right: 20px;
+}
+
+.whiteaf {
+    color: white;
+}

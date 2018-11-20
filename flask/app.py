@@ -14,7 +14,7 @@ from util import moltin, ethio, sesh, db
 
 
 # CONSTANTS ################################
-force_https = False
+FORCE_HTTPS = False
 SUPPORT_EMAIL = "damonsmedley12@gmail.com"
 
 # TODO: read these from files
@@ -24,14 +24,34 @@ MOLTIN_CSC = 'db2gPRaGP9zDhBoP1bUf3U4uPG3dxwlsyJSkKzFi7C'
 
 moltin.config({'cid': MOLTIN_CID, 'csc': MOLTIN_CSC})
 
-csp = {
+CSP_nonce_in = ['script-src', 'style-src']
+CSP = {
     'default-src': [
-        "'self'",
-        "'unsafe-inline'",
-        "'unsafe-eval'"  # change this!
+        '\'self\''
+    ],
+    'script-src': [
+        '\'self\'',
+        'https://checkout.stripe.com/checkout.js',
+        'https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js',
+        'https://cdn.rawgit.com/mgalante/jquery.redirect/master/jquery.redirect.js',
+        'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'
+
+    ],
+    'style-src': [
+        '\'self\'',
+        'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'
+    ],
+    'img-src': ['*'],
+    'connect-src': [
+        'https://checkout.stripe.com/'
+    ],
+    'frame-src': [
+        'https://checkout.stripe.com/'
+    ],
+    'font-src': [
+        '*'
     ]
 }
-
 
 # INIT CONF ####################################
 # stripe keyfile must have secret key on first line and pub key on second
@@ -50,20 +70,22 @@ stripe.api_key = stripe_keys['secret_key']
 
 # Construct app
 app = Flask(__name__, static_url_path='')
-mail = Mail(app)
 app.session_interface = sesh.RedisSessionInterface()
+
 
 # configure mail
 app.config['MAIL_SERVER'] = '172.70.0.5'
 #app.config['MAIL_USERNAME'] = 'winston'
 #app.config['MAIL_PASSWORD'] = 'smoke'
 app.config['MAIL_DEFAULT_SENDER'] = 'winston@jeeves'
-
+mail = Mail(app)
 mail.init_app(app)
 
-# TODO: Enforce CSP
 # TODO: Pimp out config (http://flask.pocoo.org/docs/1.0/config/)
-# Talisman(app, force_https=force_https, content_security_policy=csp)
+
+# Enforce CSP
+Talisman(app, force_https=FORCE_HTTPS, content_security_policy=CSP,
+         content_security_policy_nonce_in=CSP_nonce_in)
 
 
 # helper functions ==========================================================

@@ -4,7 +4,7 @@
 <head>
   <title>CWBY Coin</title>
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-  <style type="text/css" media="screen">
+  <style type="text/css" media="screen" nonce="{{ csp_nonce() }}">
     form article label {
       display: block;
       margin: 5px;
@@ -17,15 +17,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- CDN-based jQueery -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="https://cdn.rawgit.com/mgalante/jquery.redirect/master/jquery.redirect.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js" nonce="{{ csp_nonce() }}"></script>
+  <script src="https://cdn.rawgit.com/mgalante/jquery.redirect/master/jquery.redirect.js" nonce="{{ csp_nonce() }}"></script>
   <!-- CDN-based strap boot -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='extras.css') }}">
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" nonce="{{ csp_nonce() }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='extras.css') }}" nonce="{{ csp_nonce() }}">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" nonce="{{ csp_nonce() }}"></script>
   <!-- handcrafted web3 interface -->
-  <script src="{{ url_for('static', filename='bundle.js') }}" type='text/javascript'></script>
-  <script type="text/javascript">
+  <script src="{{ url_for('static', filename='bundle.js') }}" type='text/javascript' nonce="{{ csp_nonce() }}"></script>
+  <script type="text/javascript" nonce="{{ csp_nonce() }}">
     var hideOverlay = function () {
       $(".overlay").hide();
     };
@@ -47,7 +47,7 @@
   </div>
   <div class="page-header">
     <div class="container fluid">
-      <a href="/" style="text-decoration: none">
+      <a href="/" class="text-decoration-none">
         <h1>CWBY Coin</h1>
       </a>
     </div>
@@ -65,7 +65,7 @@
             <a href="/support" class="btn btn-basic">Support</a>
             <a href="/cart" class="btn btn-basic">
               Cart
-              <span style="margin-right:20px" class="glyphicon glyphicon-shopping-cart"></span>
+              <span class="glyphicon glyphicon-shopping-cart cart-icon-custom"></span>
             </a>
           </div>
         </div>
@@ -78,7 +78,7 @@
   {% block content %}
   {% endblock %}
 
-  <div style="color: white">Site built with love by <a style="color:white" href="http://github.com/BrockSmedley">Brock
+  <div class="whiteaf">Site built with love by <a class="whiteaf" href="http://github.com/BrockSmedley">Brock
       Smedley</a></div>
 </body>
 

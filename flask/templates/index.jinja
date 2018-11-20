@@ -50,8 +50,8 @@
   </div>
 </div>
 
-<script src="https://checkout.stripe.com/checkout.js"></script>
-<script type="text/javascript">
+<script src="https://checkout.stripe.com/checkout.js" nonce="{{ csp_nonce() }}"></script>
+<script type="text/javascript" nonce="{{ csp_nonce() }}">
   var _amount = 0;
   var _address = '';
   var isAddress;
