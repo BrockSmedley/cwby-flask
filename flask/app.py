@@ -17,14 +17,6 @@ from util import moltin, ethio, sesh, db
 FORCE_HTTPS = False
 SUPPORT_EMAIL = "damonsmedley12@gmail.com"
 
-# TODO: read these from files
-keyfile = open('.moltinkeys', 'r')
-MOLTIN_SID = keyfile.readline().strip('\n')
-MOLTIN_CID = keyfile.readline().strip('\n')
-MOLTIN_CSC = keyfile.readline().strip('\n')
-
-moltin.config({'cid': MOLTIN_CID, 'csc': MOLTIN_CSC})
-
 CSP_nonce_in = ['script-src', 'style-src']
 CSP = {
     'default-src': [
@@ -55,32 +47,45 @@ CSP = {
 }
 
 # INIT CONF ####################################
-# stripe keyfile must have secret key on first line and pub key on second
+# Moltin keyfile must have SID, CID, and CSC each on their own line, IN THAT ORDER
+keyfile = open('.moltinkeys', 'r')
+MOLTIN_SID = keyfile.readline().strip('\n')
+MOLTIN_CID = keyfile.readline().strip('\n')
+MOLTIN_CSC = keyfile.readline().strip('\n')
+keyfile.close()
+
+moltin.config({'cid': MOLTIN_CID, 'csc': MOLTIN_CSC})
+
+# Stripe keyfile must have secret key on first line and pub key on second
 keyfile = open('.stripekeys', 'r')
 secret_key = keyfile.readline().strip('\n')
 publishable_key = keyfile.readline().strip('\n')
 keyfile.close()
+
 stripe_keys = {
     'secret_key': secret_key,
     'publishable_key': publishable_key
 }
 stripe.api_key = stripe_keys['secret_key']
 
-
-# Construct app
+# Construct flask app object
+# TODO: Pimp out config (http://flask.pocoo.org/docs/1.0/config/)
 app = Flask(__name__, static_url_path='')
+keyfile = open('.flaskkey', 'r')
+app.config['SECRET_KEY'] = keyfile.readline().strip('\n')
+keyfile.close()
+
 app.session_interface = sesh.RedisSessionInterface()
 
-
-# configure mail
+# Configure mail
 app.config['MAIL_SERVER'] = '172.70.0.5'
 #app.config['MAIL_USERNAME'] = 'winston'
 #app.config['MAIL_PASSWORD'] = 'smoke'
 app.config['MAIL_DEFAULT_SENDER'] = 'winston@jeeves'
+# instantiate mail with app config
 mail = Mail(app)
 mail.init_app(app)
 
-# TODO: Pimp out config (http://flask.pocoo.org/docs/1.0/config/)
 
 # Enforce CSP
 Talisman(app, force_https=FORCE_HTTPS, content_security_policy=CSP,
