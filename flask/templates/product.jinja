@@ -7,15 +7,15 @@
             <div class="col-xs-4 item-photo">
                 <img src="{{imgUrl}}" class="img-thumbnail" alt="{{name}}" />
             </div>
-            <div class="col-xs-5" style="border:0px solid gray">
+            <div class="col-xs-5 product-col">
                 <!-- Datos del vendedor y titulo del producto -->
                 <h3 class="display-4" id="productTitle">{{ name }}</h3>
-                <h5 style="color:#337ab7">mfg. by <a href="#">Manufacturer</a> · <small style="color:#337ab7">(5054
+                <h5 class="product-subtitle">mfg. by <a href="#">Manufacturer</a> · <small class="product-subtitle">(5054
                         reviews)</small></h5>
 
                 <!-- Precios -->
                 <h6 class="title-price"><small>Price</small></h6>
-                <h3 style="margin-top:0px;">
+                <h3 class="price">
                     {% if not status %}
                         {{cost}} CWBY
                     {% else %}
@@ -24,20 +24,21 @@
                 </h3>
 
                 <!-- Botones de compra -->
-                <div class="section" style="padding-bottom:20px;">
+                <div class="section product-section">
                     <form action="/cart" method="POST">
                         <input type="hidden" id="id" name="id" value="{{ pid }}">
                         <input type="number" id="quantity" name="quantity" value="1">
                         <button type="submit" class="btn btn-success" id="button_buy" {% if status == "Sold Out" %}disabled{% endif %}>
-                            <span style="margin-right:20px" class="glyphicon glyphicon-shopping-cart"></span>Add to Cart
+                            <span class="glyphicon glyphicon-shopping-cart cart-item-custom"></span>Add to Cart
                         </button>
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                     </form>                    
                 </div>
             </div>
 
             <div class="col-xs-9">
                 <div>
-                    <p style="padding:15px;">
+                    <p class="product-info">
                         <small>
                             {{ description }}
                         </small>

@@ -56,3 +56,23 @@
 .cart-row {
     margin-bottom: 8px;
 }
+
+.product-info {
+    padding:15px;
+}
+
+.product-section {
+    padding-bottom:20px;
+}
+
+.price {
+    margin-top:0px;
+}
+
+.product-subtitle {
+    color:#337ab7;
+}
+
+.product-col {
+    border:0px solid gray;
+}
