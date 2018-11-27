@@ -73,7 +73,7 @@ stripe.api_key = stripe_keys['secret_key']
 # TODO: Pimp out config (http://flask.pocoo.org/docs/1.0/config/)
 app = Flask(__name__, static_url_path='')
 keyfile = open('.flaskkey', 'r')
-#app.config['SECRET_KEY'] = keyfile.readline().strip('\n')
+app.config['SECRET_KEY'] = keyfile.readline().strip('\n')
 keyfile.close()
 
 # session management with Redis
@@ -392,4 +392,4 @@ def support():
 # RUN THAT  ===================================================================
 if __name__ == '__main__':
     # TODO: disable debug
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=5000)
