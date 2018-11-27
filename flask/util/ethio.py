@@ -3,8 +3,11 @@ import web3
 import sys
 import time
 import asyncio
+import websockets
+import requests
 
-from web3 import Web3, HTTPProvider, TestRPCProvider
+from web3 import Web3, HTTPProvider, TestRPCProvider, middleware
+from web3.gas_strategies.time_based import fast_gas_price_strategy
 from solc import compile_source
 from web3.contract import ConciseContract
 
@@ -14,270 +17,350 @@ from web3.contract import ConciseContract
 # Public key:  a074c22e55610001e52b567f887dddd62b1874981a46d6cf1db0e7f2fba00a91a62576bd96fab6e558a1a05b114d06e92996f14bcf244d3232ffd297fa951856
 # Address:     0x85D519832Eee2ea676419F896B6E0A1e83a28CEA
 
-CONTRACT_ADDRESS = '0x492934308E98b590A626666B703A6dDf2120e85e'
+# infura kovan endpoint
+HTTP_ENDPOINT = 'https://kovan.infura.io/v3/1da93ca6751b45cdac2af62a4e5b464c'
+WSS_ENDPOINT = 'wss://kovan.infura.io/ws/v3/1da93ca6751b45cdac2af62a4e5b464c'
+
+# token address; must be already deployed
+# CONTRACT_ADDRESS = '0x492934308E98b590A626666B703A6dDf2120e85e' # local
+CONTRACT_ADDRESS = '0x3041EfE098e2cde8420DD16c9fBF5bde630f6168'  # kovan
 # '0x731a10897d267e19B34503aD902d0A29173Ba4B1'
 
-
-# def compileTestContract():
-#     # Solidity source code
-#     contract_src = '''
-# 		pragma solidity ^0.4.0;
-
-# 		contract Greeter {
-# 				string public greeting;
-
-# 				function Greeter(){
-# 						greeting = "Howdy";
-# 				}
-
-# 				function setGreeting(string _greeting) public {
-# 						greeting = _greeting;
-# 				}
-
-# 				function greet() constant returns (string) {
-# 						return greeting;
-# 				}
-# 		}
-# 		'''
-
-#     return compile_source(contract_src)
-
-# # compiles and deploys a test contract
-# # only works on testRPC b/c transactions need to be signed
-# def buildTestContract():
-#     PROVIDER = TestRPCProvider()
-
-#     compiled_sol = compileTestContract()
-#     contract_io = compiled_sol['<stdin>:Greeter']
-
-#     # web3.py instance
-#     w3i = Web3(PROVIDER)
-
-#     # instantiate and deploy contract
-#     contract = w3i.eth.contract(
-#         abi=contract_io['abi'], bytecode=contract_io['bin'])
-
-#     # get tx hash from deployed contract
-#     tx_hash = contract.deploy(
-#         transaction={'from': w3i.eth.accounts[0], 'gas': 420000})
-
-#     # get tx receipt from deployed contract
-#     tx_receipt = w3i.eth.getTransactionReceipt(tx_hash)
-#     contract_address = tx_receipt['CONTRACT_ADDRESS']
-
-#     # contract instance in concise mode
-#     abi = contract_io['abi']
-#     contract_instance = w3i.eth.contract(
-#         address=contract_address, abi=abi, ContractFactoryClass=ConciseContract)
-
-#     # getters & setters for web3.eth.contract object
-#     print('Contract value: {}'.format(contract_instance.greet()))
-#     contract_instance.setGreeting(
-#         'd\'herroo', transact={'from': w3i.eth.accounts[0]})
-#     print('Setting new greeting')
-#     return('Contract value: {}'.format(contract_instance.greet()))
+# address of API (this thing)
+API_ADDRESS = '0x85D519832Eee2ea676419F896B6E0A1e83a28CEA'
+API_ADDRESS = Web3.toChecksumAddress(API_ADDRESS.lower())
 
 
-# TODO: Implement parity host in Docker; don't expose this to host network in prod!
-def getProvider(host=None):
+def getProvider():
     # return TestRPCProvider()
     # httpHost = "http://10.0.0.128"# brock's laptop
-    if (host):
-        httpHost = host
-    else:
-        httpHost = "http://172.70.0.3"
-    return Web3.HTTPProvider(httpHost+":8545", request_kwargs={'timeout': 10})
+
+    return Web3.HTTPProvider(HTTP_ENDPOINT, request_kwargs={'timeout': 10})
+
+
+def getWsProvider():
+    return Web3.WebsocketProvider(WSS_ENDPOINT)
 
 
 def ABI():
     return '''
 		[
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "_spender",
-				"type": "address"
-			},
-			{
-				"name": "_value",
-				"type": "uint256"
-			}
-		],
-		"name": "approve",
-		"outputs": [
-			{
-				"name": "success",
-				"type": "bool"
-			}
-		],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "totalSupply",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "_from",
-				"type": "address"
-			},
-			{
-				"name": "_to",
-				"type": "address"
-			},
-			{
-				"name": "_value",
-				"type": "uint256"
-			}
-		],
-		"name": "transferFrom",
-		"outputs": [
-			{
-				"name": "success",
-				"type": "bool"
-			}
-		],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "_owner",
-				"type": "address"
-			}
-		],
-		"name": "balanceOf",
-		"outputs": [
-			{
-				"name": "balance",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "_to",
-				"type": "address"
-			},
-			{
-				"name": "_value",
-				"type": "uint256"
-			}
-		],
-		"name": "transfer",
-		"outputs": [
-			{
-				"name": "success",
-				"type": "bool"
-			}
-		],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "_owner",
-				"type": "address"
-			},
-			{
-				"name": "_spender",
-				"type": "address"
-			}
-		],
-		"name": "allowance",
-		"outputs": [
-			{
-				"name": "remaining",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"name": "_from",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"name": "_to",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"name": "_value",
-				"type": "uint256"
-			}
-		],
-		"name": "Transfer",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"name": "_owner",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"name": "_spender",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"name": "_value",
-				"type": "uint256"
-			}
-		],
-		"name": "Approval",
-		"type": "event"
-	}
-]
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "name": "addedValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "increaseAllowance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "addMinter",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "renounceMinter",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "name": "subtractedValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "decreaseAllowance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "transfer",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "isMinter",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "name": "spender",
+          "type": "address"
+        }
+      ],
+      "name": "allowance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "MinterAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "MinterRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Approval",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "mint",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]
 		'''
 
 
 def getContract(provider=None):
     # get web3 interface
-    provider = getProvider(provider)
+    if (provider == None):
+        provider = getProvider()
     w3 = Web3(provider)
 
     return w3.eth.contract(address=CONTRACT_ADDRESS, abi=ABI())
@@ -285,9 +368,9 @@ def getContract(provider=None):
 
 # sends coins from API_ADDRESS to address_receiver
 # this means API_ADDRESS must be stocked with coins
-def orderCoins(numCoins, address_receiver, provider=None):
+def orderCoins(numCoins, address_receiver):
     # get web3 interface
-    provider = getProvider(provider)
+    provider = getProvider()
     w3 = Web3(provider)
 
     # convert receiver address to checksum address
@@ -297,10 +380,6 @@ def orderCoins(numCoins, address_receiver, provider=None):
     keyfile = open('.ethkey', 'r')
     PRIVATE_KEY_API = keyfile.readline().strip('\n')
     keyfile.close()
-
-    # address of API (this thing)
-    API_ADDRESS = '0x85D519832Eee2ea676419F896B6E0A1e83a28CEA'
-    API_ADDRESS = Web3.toChecksumAddress(API_ADDRESS.lower())
 
     # sender account's nonce
     nonce = w3.eth.getTransactionCount(API_ADDRESS)
@@ -322,12 +401,10 @@ def orderCoins(numCoins, address_receiver, provider=None):
     tx = contract.functions.transfer(RECEIVER_ADDRESS, coins).buildTransaction(
         {'chainId': None,
          'gas': 70000,
-         # w3.toWei('1', 'wei'), #TODO: use estimateGas(?)
-         'gasPrice': 4,
+         'gasPrice': 5,
          'from': API_ADDRESS, 'nonce': nonce,
          }
     )
-    # print (tx, file=sys.stderr)
 
     # sign tx locally
     signed_tx = w3.eth.account.signTransaction(tx, private_key=PRIVATE_KEY_API)
@@ -336,22 +413,53 @@ def orderCoins(numCoins, address_receiver, provider=None):
     return result.hex()
 
 
-def handlePayment(customerAddress):
-    provider = getProvider()
-    w3 = Web3(provider)
-    contract = getContract()
+def paymentFilter(contract, customerAddress, block, amount):
+    return contract.events.Transfer.createFilter(
+        fromBlock=hex(block), argument_filters={'from': customerAddress, 'to': CONTRACT_ADDRESS, 'value': int(amount)})
 
-    block = hex(w3.eth.blockNumber+1)
+
+# return payment logs from infura
+# use external filter for efficiency (no recurring garbage collection)
+def paymentLogs(customerAddress, block, wsProvider, contract, _filter):
+    if (_filter == None):
+        filt = paymentFilter(contract, customerAddress, block)
+    else:
+        filt = _filter
+
+    res = filt.get_all_entries()
+
+    # send it
+    return res
+
+
+# wait for payment confirmation from customerAddress
+def handlePayment(customerAddress, amount, n=0):
+    if (n > 0 and n <= 3):
+        # sleep on successive tries
+        time.sleep(n)
+    elif (n > 3):
+        print("ERROR: websocket disconnected. Payment NOT handled.")
+        return None
+
+    httpProvider = getProvider()
+    wsProvider = getWsProvider()
+    contract = getContract(wsProvider)
+    w3 = Web3(httpProvider)
+
+    block = w3.eth.blockNumber
     print(block)
 
-    payment_logs = contract.events.Transfer.createFilter(
-        fromBlock=str(block), argument_filters={'from': customerAddress})
+    try:
+        filt = paymentFilter(contract, customerAddress, block, amount)
+    except websockets.exceptions.ConnectionClosed as bs:
+        # try again up to 3 times
+        return handlePayment(customerAddress, amount, n+1)
 
-    paid = False
-    while (not paid):
-        payments = payment_logs.get_all_entries()
-        if (len(payments) > 0):
-            print(payments)
-            paid = True
+    payments = []
+    while (len(payments) == 0):
+        payments = paymentLogs(customerAddress, block,
+                               wsProvider, contract, filt)
+
+    print(payments)
 
     return payments

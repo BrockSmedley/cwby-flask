@@ -1,5 +1,5 @@
 {% extends "layout.jinja" %}
-{% set overlayTitle="Awaiting Payment..." %} 
+{% set overlayTitle="Awaiting payment..." %} 
 {% set overlayInfo="Please check Metamask to submit your payment." %}
 {% block content %}
     <div class="container">
@@ -60,6 +60,7 @@
                     </div>
                 </div>
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="amount" value="{{cost}}">
             </form>
         </div>
     </div>
@@ -74,8 +75,6 @@
             var txRes = await spendTokens(cost).then(function(){
                 console.log("txRes: " + txRes);
             });
-            
-            //sessionStorage.setItem('txRes', txRes);
         }
         $(document).ready(function () {
             //-- Click on detail
@@ -101,7 +100,6 @@
         window.addEventListener('load', async () => {
             // check for web3 injection
             if (window.ethereum){
-                alert("window.ethereum is good.");
                 try{
                     // request account access if needed
                     await ethereum.enable();

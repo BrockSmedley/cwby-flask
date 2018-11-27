@@ -309,6 +309,7 @@ def confirmation():
     firstname = request.form['firstname']
     lastname = request.form['lastname']
     email = request.form['email']
+    amount = request.form['amount']
 
     ethAddress = db.getCustomerAddress(email)
 
@@ -355,13 +356,13 @@ def confirmation():
     # store order info in local DB
     db.newOrder(orderId, json)
 
-    # subscribe to transfer event w/ customer address filter
-    ethio.handlePayment(ethAddress)
+    # wait for payment to be received
+    ethio.handlePayment(ethAddress, amount)
 
     # authorize payment manually
     req = _authorize(orderId)
 
-    # delete cart after payment
+    # delete cart on checkout
     moltin.ensure_auth()
     moltin.delete_cart(cartId)
 

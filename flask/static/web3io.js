@@ -1,7 +1,7 @@
 const w3utils = require('web3-utils');
 
-const api_host = "http://172.70.0.2:5000";
-const CONTRACT_ADDRESS = "0x492934308E98b590A626666B703A6dDf2120e85e"; // cdev
+//const CONTRACT_ADDRESS = "0x492934308E98b590A626666B703A6dDf2120e85e"; // cdev
+const CONTRACT_ADDRESS = "0x3041EfE098e2cde8420DD16c9fBF5bde630f6168"; // kovan
 // "0x731a10897d267e19B34503aD902d0A29173Ba4B1"; // OG CWBY
 
 const startApp = function (web3) {
@@ -57,22 +57,26 @@ const getAddress = function () {
 };
 
 const getAbi = function () {
-    return [{
+    return [
+        {
             "constant": false,
-            "inputs": [{
-                    "name": "_spender",
+            "inputs": [
+                {
+                    "name": "spender",
                     "type": "address"
                 },
                 {
-                    "name": "_value",
+                    "name": "value",
                     "type": "uint256"
                 }
             ],
             "name": "approve",
-            "outputs": [{
-                "name": "success",
-                "type": "bool"
-            }],
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
             "payable": false,
             "stateMutability": "nonpayable",
             "type": "function"
@@ -81,114 +85,236 @@ const getAbi = function () {
             "constant": true,
             "inputs": [],
             "name": "totalSupply",
-            "outputs": [{
-                "name": "",
-                "type": "uint256"
-            }],
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
             "payable": false,
             "stateMutability": "view",
             "type": "function"
         },
         {
             "constant": false,
-            "inputs": [{
-                    "name": "_from",
+            "inputs": [
+                {
+                    "name": "from",
                     "type": "address"
                 },
                 {
-                    "name": "_to",
+                    "name": "to",
                     "type": "address"
                 },
                 {
-                    "name": "_value",
+                    "name": "value",
                     "type": "uint256"
                 }
             ],
             "name": "transferFrom",
-            "outputs": [{
-                "name": "success",
-                "type": "bool"
-            }],
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "spender",
+                    "type": "address"
+                },
+                {
+                    "name": "addedValue",
+                    "type": "uint256"
+                }
+            ],
+            "name": "increaseAllowance",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
             "payable": false,
             "stateMutability": "nonpayable",
             "type": "function"
         },
         {
             "constant": true,
-            "inputs": [{
-                "name": "_owner",
-                "type": "address"
-            }],
+            "inputs": [
+                {
+                    "name": "owner",
+                    "type": "address"
+                }
+            ],
             "name": "balanceOf",
-            "outputs": [{
-                "name": "balance",
-                "type": "uint256"
-            }],
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
             "payable": false,
             "stateMutability": "view",
             "type": "function"
         },
         {
             "constant": false,
-            "inputs": [{
-                    "name": "_to",
+            "inputs": [
+                {
+                    "name": "account",
+                    "type": "address"
+                }
+            ],
+            "name": "addMinter",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "renounceMinter",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "spender",
                     "type": "address"
                 },
                 {
-                    "name": "_value",
+                    "name": "subtractedValue",
+                    "type": "uint256"
+                }
+            ],
+            "name": "decreaseAllowance",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "name": "value",
                     "type": "uint256"
                 }
             ],
             "name": "transfer",
-            "outputs": [{
-                "name": "success",
-                "type": "bool"
-            }],
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
             "payable": false,
             "stateMutability": "nonpayable",
             "type": "function"
         },
         {
             "constant": true,
-            "inputs": [{
-                    "name": "_owner",
-                    "type": "address"
-                },
+            "inputs": [
                 {
-                    "name": "_spender",
+                    "name": "account",
                     "type": "address"
                 }
             ],
-            "name": "allowance",
-            "outputs": [{
-                "name": "remaining",
-                "type": "uint256"
-            }],
+            "name": "isMinter",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
             "payable": false,
             "stateMutability": "view",
             "type": "function"
         },
         {
-            "inputs": [],
+            "constant": true,
+            "inputs": [
+                {
+                    "name": "owner",
+                    "type": "address"
+                },
+                {
+                    "name": "spender",
+                    "type": "address"
+                }
+            ],
+            "name": "allowance",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
             "payable": false,
-            "stateMutability": "nonpayable",
-            "type": "constructor"
+            "stateMutability": "view",
+            "type": "function"
         },
         {
             "anonymous": false,
-            "inputs": [{
+            "inputs": [
+                {
                     "indexed": true,
-                    "name": "_from",
+                    "name": "account",
+                    "type": "address"
+                }
+            ],
+            "name": "MinterAdded",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "account",
+                    "type": "address"
+                }
+            ],
+            "name": "MinterRemoved",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "from",
                     "type": "address"
                 },
                 {
                     "indexed": true,
-                    "name": "_to",
+                    "name": "to",
                     "type": "address"
                 },
                 {
                     "indexed": false,
-                    "name": "_value",
+                    "name": "value",
                     "type": "uint256"
                 }
             ],
@@ -197,24 +323,48 @@ const getAbi = function () {
         },
         {
             "anonymous": false,
-            "inputs": [{
+            "inputs": [
+                {
                     "indexed": true,
-                    "name": "_owner",
+                    "name": "owner",
                     "type": "address"
                 },
                 {
                     "indexed": true,
-                    "name": "_spender",
+                    "name": "spender",
                     "type": "address"
                 },
                 {
                     "indexed": false,
-                    "name": "_value",
+                    "name": "value",
                     "type": "uint256"
                 }
             ],
             "name": "Approval",
             "type": "event"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "name": "value",
+                    "type": "uint256"
+                }
+            ],
+            "name": "mint",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
         }
     ];
 }
@@ -268,7 +418,7 @@ var spendTokens = function (cost) {
                     }
                     else {
                         console.error(error);
-                        resolve(0);
+                        resolve(error);
                     }
                 }));
             }
