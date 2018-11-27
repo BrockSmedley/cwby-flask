@@ -3,11 +3,13 @@ import web3
 import sys
 import time
 import asyncio
+import websockets
+import requests
 
-from web3 import Web3, HTTPProvider, TestRPCProvider
+from web3 import Web3, HTTPProvider, TestRPCProvider, middleware
+from web3.gas_strategies.time_based import fast_gas_price_strategy
 from solc import compile_source
 from web3.contract import ConciseContract
-import requests
 
 
 # TEST API ACCOUNT INFO
@@ -399,8 +401,7 @@ def orderCoins(numCoins, address_receiver):
     tx = contract.functions.transfer(RECEIVER_ADDRESS, coins).buildTransaction(
         {'chainId': None,
          'gas': 70000,
-         # w3.toWei('1', 'wei'), #TODO: use estimateGas(?)
-         'gasPrice': 4,
+         'gasPrice': 5,
          'from': API_ADDRESS, 'nonce': nonce,
          }
     )
@@ -432,7 +433,14 @@ def paymentLogs(customerAddress, block, wsProvider, contract, _filter):
 
 
 # wait for payment confirmation from customerAddress
-def handlePayment(customerAddress, amount):
+def handlePayment(customerAddress, amount, n=0):
+    if (n > 0 and n <= 3):
+        # sleep on successive tries
+        time.sleep(n)
+    elif (n > 3):
+        print("ERROR: websocket disconnected. Payment NOT handled.")
+        return None
+
     httpProvider = getProvider()
     wsProvider = getWsProvider()
     contract = getContract(wsProvider)
@@ -441,7 +449,11 @@ def handlePayment(customerAddress, amount):
     block = w3.eth.blockNumber
     print(block)
 
-    filt = paymentFilter(contract, customerAddress, block, amount)
+    try:
+        filt = paymentFilter(contract, customerAddress, block, amount)
+    except websockets.exceptions.ConnectionClosed as bs:
+        # try again up to 3 times
+        return handlePayment(customerAddress, amount, n+1)
 
     payments = []
     while (len(payments) == 0):
