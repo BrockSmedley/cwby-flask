@@ -366,9 +366,9 @@ def getContract(provider=None):
 
 # sends coins from API_ADDRESS to address_receiver
 # this means API_ADDRESS must be stocked with coins
-def orderCoins(numCoins, address_receiver, provider=None):
+def orderCoins(numCoins, address_receiver):
     # get web3 interface
-    provider = getProvider(provider)
+    provider = getProvider()
     w3 = Web3(provider)
 
     # convert receiver address to checksum address
