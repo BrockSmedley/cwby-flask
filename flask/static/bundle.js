@@ -7382,7 +7382,7 @@ var spendTokens = function (cost) {
                     }
                     else {
                         console.error(error);
-                        resolve(0);
+                        resolve(error);
                     }
                 }));
             }

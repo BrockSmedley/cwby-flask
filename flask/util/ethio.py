@@ -7,6 +7,7 @@ import asyncio
 from web3 import Web3, HTTPProvider, TestRPCProvider
 from solc import compile_source
 from web3.contract import ConciseContract
+import requests
 
 
 # TEST API ACCOUNT INFO
@@ -16,7 +17,7 @@ from web3.contract import ConciseContract
 
 # infura kovan endpoint
 HTTP_ENDPOINT = 'https://kovan.infura.io/v3/1da93ca6751b45cdac2af62a4e5b464c'
-#WSS_ENDPOINT = 'wss://https://kovan.infura.io/ws/v3/1da93ca6751b45cdac2af62a4e5b464c'
+WSS_ENDPOINT = 'wss://kovan.infura.io/ws/v3/1da93ca6751b45cdac2af62a4e5b464c'
 
 # token address; must be already deployed
 # CONTRACT_ADDRESS = '0x492934308E98b590A626666B703A6dDf2120e85e' # local
@@ -28,21 +29,15 @@ API_ADDRESS = '0x85D519832Eee2ea676419F896B6E0A1e83a28CEA'
 API_ADDRESS = Web3.toChecksumAddress(API_ADDRESS.lower())
 
 
-def getProvider(host=None):
+def getProvider():
     # return TestRPCProvider()
     # httpHost = "http://10.0.0.128"# brock's laptop
-    httpHost = None
-    wsHost = None
 
-    if (host):
-        httpHost = host
-    else:
-        httpHost = HTTP_ENDPOINT
+    return Web3.HTTPProvider(HTTP_ENDPOINT, request_kwargs={'timeout': 10})
 
-    if (wsHost):
-        return Web3.WebsocketProvider(WSS_ENDPOINT)
-    else:
-        return Web3.HTTPProvider(httpHost, request_kwargs={'timeout': 10})
+
+def getWsProvider():
+    return Web3.WebsocketProvider(WSS_ENDPOINT)
 
 
 def ABI():
@@ -362,7 +357,8 @@ def ABI():
 
 def getContract(provider=None):
     # get web3 interface
-    provider = getProvider(provider)
+    if (provider == None):
+        provider = getProvider()
     w3 = Web3(provider)
 
     return w3.eth.contract(address=CONTRACT_ADDRESS, abi=ABI())
@@ -416,23 +412,42 @@ def orderCoins(numCoins, address_receiver, provider=None):
     return result.hex()
 
 
-# wait for payment confirmation from customerAddress
-def handlePayment(customerAddress):
-    provider = getProvider()
-    w3 = Web3(provider)
-    contract = getContract()
+def paymentFilter(contract, customerAddress, block, amount):
+    return contract.events.Transfer.createFilter(
+        fromBlock=hex(block), argument_filters={'from': customerAddress, 'to': CONTRACT_ADDRESS, 'value': int(amount)})
 
-    block = hex(w3.eth.blockNumber+1)
+
+# return payment logs from infura
+# use external filter for efficiency (no recurring garbage collection)
+def paymentLogs(customerAddress, block, wsProvider, contract, _filter):
+    if (_filter == None):
+        filt = paymentFilter(contract, customerAddress, block)
+    else:
+        filt = _filter
+
+    res = filt.get_all_entries()
+
+    # send it
+    return res
+
+
+# wait for payment confirmation from customerAddress
+def handlePayment(customerAddress, amount):
+    httpProvider = getProvider()
+    wsProvider = getWsProvider()
+    contract = getContract(wsProvider)
+    w3 = Web3(httpProvider)
+
+    block = w3.eth.blockNumber
     print(block)
 
-    payment_logs = contract.events.Transfer.createFilter(
-        fromBlock=str(block), argument_filters={'from': customerAddress})
+    filt = paymentFilter(contract, customerAddress, block, amount)
 
-    paid = False
-    while (not paid):
-        payments = payment_logs.get_all_entries()
-        if (len(payments) > 0):
-            print(payments)
-            paid = True
+    payments = []
+    while (len(payments) == 0):
+        payments = paymentLogs(customerAddress, block,
+                               wsProvider, contract, filt)
+
+    print(payments)
 
     return payments
