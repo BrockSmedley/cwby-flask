@@ -3,7 +3,7 @@ services:
   web:
     build: ./flask
     ports:
-      - "5000:5000"
+      - "80:5000"
     networks:
       legacy:
         ipv4_address: 172.70.0.2
