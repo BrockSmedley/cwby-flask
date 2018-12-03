@@ -72,7 +72,6 @@ stripe_keys = {
 stripe.api_key = stripe_keys['secret_key']
 
 # Construct flask app object
-# TODO: Pimp out config (http://flask.pocoo.org/docs/1.0/config/)
 app = Flask(__name__, static_url_path='')
 keyfile = open('.flaskkey', 'r')
 app.config['SECRET_KEY'] = keyfile.readline().strip('\n')
@@ -393,6 +392,5 @@ def support():
 
 # RUN THAT  ===================================================================
 if __name__ == '__main__':
-    # TODO: change to port 80
     #app.run(debug=False, host='0.0.0.0', port=5000)
     serve(app, listen='*:5000')

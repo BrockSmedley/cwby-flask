@@ -6978,7 +6978,7 @@ const startApp = function (web3) {
         web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
     }
 
-    console.log("web3 initialized.");
+    //console.log("web3 initialized.");
 };
 
 // callback function to store value for Stripe dialog
@@ -7368,8 +7368,8 @@ var spendTokens = function (cost) {
     var balance = -1;
     return new Promise(resolve => tokens.balanceOf(address, function (error, result) {
         if (!error){
-            console.log("balance: " + result);
-            console.log("Cost: " + cost + " CWBY");
+            //console.log("balance: " + result);
+            //console.log("Cost: " + cost + " CWBY");
             balance = result;
             // attempt transaction
             if (balance >= _cost) {
