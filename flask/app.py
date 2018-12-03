@@ -268,6 +268,11 @@ def cart():
             print(req)
             abort(500)
 
+    # check for cart updates
+    rm = request.args.get('rm')
+    if (rm):
+        moltin.solidRequest(moltin.remove_item_cart, cartId=cartId, itemId=rm)
+
     # retrieve cart items
     items = moltin.solidRequest(moltin.get_cart_items, cartId=cartId)
 
