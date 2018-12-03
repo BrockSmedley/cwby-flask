@@ -1,15 +1,17 @@
 import os
 import sys
-from flask import Flask, render_template, request, redirect, send_from_directory, url_for, abort, session, escape
-from flask_mail import Message, Mail
 import requests
 import stripe
 import binascii
 import redis
 import secrets
 import asyncio
+
+from flask import Flask, render_template, request, redirect, send_from_directory, url_for, abort, session, escape
+from flask_mail import Message, Mail
 from flask_talisman import Talisman
 from flask_seasurf import SeaSurf
+from waitress import serve
 
 from util import moltin, ethio, sesh, db
 
@@ -70,10 +72,9 @@ stripe_keys = {
 stripe.api_key = stripe_keys['secret_key']
 
 # Construct flask app object
-# TODO: Pimp out config (http://flask.pocoo.org/docs/1.0/config/)
 app = Flask(__name__, static_url_path='')
 keyfile = open('.flaskkey', 'r')
-#app.config['SECRET_KEY'] = keyfile.readline().strip('\n')
+app.config['SECRET_KEY'] = keyfile.readline().strip('\n')
 keyfile.close()
 
 # session management with Redis
@@ -267,6 +268,11 @@ def cart():
             print(req)
             abort(500)
 
+    # check for cart updates
+    rm = request.args.get('rm')
+    if (rm):
+        moltin.solidRequest(moltin.remove_item_cart, cartId=cartId, itemId=rm)
+
     # retrieve cart items
     items = moltin.solidRequest(moltin.get_cart_items, cartId=cartId)
 
@@ -391,5 +397,5 @@ def support():
 
 # RUN THAT  ===================================================================
 if __name__ == '__main__':
-    # TODO: disable debug
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    #app.run(debug=False, host='0.0.0.0', port=5000)
+    serve(app, listen='*:5000')

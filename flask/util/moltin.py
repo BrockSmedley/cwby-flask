@@ -93,6 +93,18 @@ def delete_cart(cartId):
 def get_settings():
     url = "https://api.moltin.com/v2/settings"
     return requests.get(url, headers=auth_header())
+
+
+def update_cart(cartId, itemId, itemData):
+    url = "https://api.moltin.com/v2/carts/%s/items/%s" % (cartId, itemId)
+    return requests.put(url, headers=auth_header(), json=itemData)
+
+
+def remove_item_cart(cartId, itemId):
+    url = "https://api.moltin.com/v2/carts/%s/items/%s" % (cartId, itemId)
+    return requests.delete(url, headers=auth_header())
+
+
 # end {bitch code}
 
 

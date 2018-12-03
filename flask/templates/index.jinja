@@ -78,7 +78,7 @@
     token: function (token) { // "AKA token callback"
       // access token with `token.id`
       // get token ID for server-side code usage
-      console.log(token.id);
+      //console.log(token.id);
 
       showOverlay();
 
@@ -108,12 +108,12 @@
       if (form.checkValidity() === false) {
         e.preventDefault();
         e.stopPropagation();
-        alert("Please fill in all fields (Amount must be an integer).");
+        alert("Invalid form values. Amount must be a positive integer.");
       } else {
         if (getAddress() == "0x0") {
           e.preventDefault();
           e.stopPropagation();
-          alert("Invalid address format.");
+          alert("Invalid address.");
         } else if (getAmount() <= 0) {
           e.preventDefault();
           e.stopPropagation();

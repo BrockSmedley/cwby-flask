@@ -12,6 +12,7 @@
                         <div class="col-md-8">{{ i['name'] }}</div>
                         <div class="col-md-3">
                             <span>({{ i['quantity'] }}) Price: {{ i['unit_price']['amount'] }} CWBY</span>
+                            <a href="/cart?rm={{ i['id'] }}">Delete</a>
                         </div>
                     </div>
                 {% endfor %}
