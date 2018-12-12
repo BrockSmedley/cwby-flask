@@ -41,7 +41,8 @@ CSP = {
         'https://checkout.stripe.com/'
     ],
     'frame-src': [
-        'https://checkout.stripe.com/'
+        'https://checkout.stripe.com/',
+        'self'
     ],
     'font-src': [
         '*'
@@ -75,6 +76,10 @@ app = Flask(__name__, static_url_path='')
 keyfile = open('.flaskkey', 'r')
 app.config['SECRET_KEY'] = keyfile.readline().strip('\n')
 keyfile.close()
+app.config['SESSION_COOKIE_SECURE'] = FORCE_HTTPS
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+#app.config['USE_X_SENDFILE'] = True
+app.config['SERVER_NAME'] = "cwby.biz"
 
 # session management with Redis
 app.session_interface = sesh.RedisSessionInterface()
@@ -84,9 +89,9 @@ app.config['CSRF_COOKIE_NAME'] = "CWBY_CSRF"
 app.config['CSRF_COOKIE_TIMEOUT'] = 2678400  # 31 days in seconds
 app.config['CSRF_COOKIE_SECURE'] = FORCE_HTTPS
 # app.config['CSRF_COOKIE_PATH']
-# app.config['CSRF_COOKIE_DOMAIN']
-# app.config['CSRF_COOKIE_SAMESITE']
-app.config['CSRF_DISABLE'] = True
+app.config['CSRF_COOKIE_DOMAIN'] = "cwby.biz"
+app.config['CSRF_COOKIE_SAMESITE'] = "Lax"
+#app.config['CSRF_DISABLE'] = True
 csrf = SeaSurf(app)
 csrf.init_app(app)
 
@@ -396,4 +401,4 @@ def support():
 
 # RUN THAT  ===================================================================
 if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)
