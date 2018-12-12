@@ -38,7 +38,8 @@ CSP = {
     ],
     'img-src': ['*'],
     'connect-src': [
-        'https://checkout.stripe.com/'
+        'https://checkout.stripe.com/',
+        'self'
     ],
     'frame-src': [
         'https://checkout.stripe.com/',
@@ -85,7 +86,7 @@ app.config['SERVER_NAME'] = "cwby.biz"
 app.session_interface = sesh.RedisSessionInterface()
 
 # CSRF prevention with SeaSurf
-app.config['CSRF_COOKIE_NAME'] = "CWBY_CSRF"
+app.config['CSRF_COOKIE_NAME'] = "_csrf_token"
 app.config['CSRF_COOKIE_TIMEOUT'] = 2678400  # 31 days in seconds
 app.config['CSRF_COOKIE_SECURE'] = FORCE_HTTPS
 # app.config['CSRF_COOKIE_PATH']
@@ -216,7 +217,7 @@ def product(pid):
         return render_template('product.jinja', name=name, description=description, cost=price, imgUrl=imgUrl, pid=pid)
 
 
-@csrf.exempt  # charge only called by stripe, so it's exempt
+@csrf.exempt  # charge called by stripe, so it must be exempt (the request won't have our CSRF token)
 @app.route('/charge', methods=['POST', 'GET'])
 def charge():
     if (request.method == 'GET'):
@@ -401,4 +402,4 @@ def support():
 
 # RUN THAT  ===================================================================
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=5000)

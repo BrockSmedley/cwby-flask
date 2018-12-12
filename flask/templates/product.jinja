@@ -25,7 +25,7 @@
 
                 <!-- Botones de compra -->
                 <div class="section product-section">
-                    <form action="/cart" method="POST">
+                    <form action="/cart" method="post" class="needs-validation">
                         <input type="hidden" id="id" name="id" value="{{ pid }}">
                         <input type="number" id="quantity" name="quantity" value="1">
                         <button type="submit" class="btn btn-success" id="button_buy" {% if status == "Sold Out" %}disabled{% endif %}>
