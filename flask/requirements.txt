@@ -6,5 +6,4 @@ flask-talisman==0.6.0
 py-solc==3.2.0
 redis==3.0.1
 stripe==2.12.1
-waitress==1.1.0
 web3==4.8.2

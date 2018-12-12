@@ -11,7 +11,6 @@ from flask import Flask, render_template, request, redirect, send_from_directory
 from flask_mail import Message, Mail
 from flask_talisman import Talisman
 from flask_seasurf import SeaSurf
-from waitress import serve
 
 from util import moltin, ethio, sesh, db
 
@@ -397,5 +396,4 @@ def support():
 
 # RUN THAT  ===================================================================
 if __name__ == '__main__':
-    #app.run(debug=False, host='0.0.0.0', port=5000)
-    serve(app, listen='*:5000')
+    app.run(debug=False, host='0.0.0.0', port=5000)
