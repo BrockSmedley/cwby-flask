@@ -1,12 +1,29 @@
 version: '3'
 services:
-  web:
-    build: ./flask
+  backend:
+    build:
+      context: flask
+    volumes:
+      - ./flask/static:/usr/src/app/public
     ports:
-      - "80:5000"
+      - 5000:5000
     networks:
       legacy:
         ipv4_address: 172.70.0.2
+  
+  frontend:
+    image: nginx:1.14-alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./flask/static:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+    ports:
+      - 80:80
+    networks:
+      legacy:
+        ipv4_address: 172.70.0.3
+      
   redis:
     image: redis
     ports:
@@ -14,6 +31,7 @@ services:
     networks:
       legacy:
         ipv4_address: 172.70.0.4
+
   maildev:
     image: djfarrelly/maildev
     ports:

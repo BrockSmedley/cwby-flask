@@ -1,19 +1,20 @@
-FROM ubuntu:18.04
-
-RUN apt-get update && apt-get install -y apt-utils python3 python3-pip autoconf dh-autoreconf libssl-dev build-essential automake pkg-config libtool libffi-dev libgmp-dev libsecp256k1-dev
-RUN apt-get install -y software-properties-common && add-apt-repository ppa:ethereum/ethereum && apt-get update && apt-get install -y solc
-RUN pip3 install --upgrade setuptools
+FROM alpine:3.8
+EXPOSE 5000
+RUN apk add --no-cache uwsgi-python3 python3 pkgconfig libffi gcc python3-dev musl-dev
 
 RUN mkdir -p /src/app/
 WORKDIR /src/app
 
 # copy only requirements.txt to avoid re-building pip dependency layer on every build...
 ADD ./requirements.txt /src/app/
-RUN pip3 install -r requirements.txt
+RUN pip3 install --upgrade pip
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # ...then copy the rest (app files need frequent rebuilding)
 COPY . /src/app
 
-EXPOSE 5000
-
-CMD ["python3", "app.py"]
+CMD [ "uwsgi",  "--socket", "0.0.0.0:5000", \
+                "--uid", "uwsgi", \
+                "--plugins", "python3", \
+                "--protocol", "uwsgi", \
+                "--wsgi", "app:app" ]
