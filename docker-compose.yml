@@ -7,22 +7,6 @@ services:
     networks:
       legacy:
         ipv4_address: 172.70.0.2
-  parity:
-    volumes:
-      - "/Users/Brock/.local/share/io.parity.ethereum/docker/:/root/.local/share/io.parity.ethereum/"
-    build: ./parity
-    command: ["--config", "/root/.local/share/io.parity.ethereum/config.toml", "--cache-size", "4096"]
-    ports:
-      - "8180:8180/udp"
-      - "8545:8545"
-      - "8545:8545/udp"
-      - "8546:8546"
-      - "8546:8546/udp"
-      - "30303:30303"
-      - "30303:30303/udp"
-    networks:
-      legacy:
-        ipv4_address: 172.70.0.3
   redis:
     image: redis
     ports:
