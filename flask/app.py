@@ -97,10 +97,10 @@ csrf = SeaSurf(app)
 csrf.init_app(app)
 
 # Configure mail
-app.config['MAIL_SERVER'] = '172.70.0.5'
-#app.config['MAIL_USERNAME'] = 'winston'
-#app.config['MAIL_PASSWORD'] = 'smoke'
-app.config['MAIL_DEFAULT_SENDER'] = 'winston@jeeves'
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_SSL'] = True
+app.config.from_object('settings.cfg')
 # instantiate mail with app config
 mail = Mail(app)
 mail.init_app(app)
