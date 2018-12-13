@@ -111,3 +111,4 @@ flask/.ethkey
 .vscode/settings.json
 flask/.moltinkeys
 flask/.flaskkey
+flask/static/bundle.js
