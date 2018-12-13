@@ -1,9 +1,13 @@
 {% extends "layout.jinja" %}
 {% block content %}
     <div class="jumbotron container">
-        <h1 class="display-4">Yeee-haw!</h1>
-        <p class="lead">You bought <strong>{{coins}}</strong> CWBY coins for <strong>${{dollars}}!</strong></p>
-        <div><a href="/products"><h4>Browse Our Product</h4></a></div>
+	<div class="col-md-8">
+            <h1 class="display-4">Yeee-haw!</h1>
+            <p class="lead">You bought <strong>{{coins}}</strong> CWBY coins for <strong>${{dollars}}!</strong></p>
+	</div>
+	<div class="col-md-4">
+            <div><a href="/products"><h4>Browse Our Product</h4></a></div>
+	</div>
         <hr class="my-4">
         {% if txid == 'none' %}
             <div>Uh-oh. Our system encountered a rare error with your token payout. Please contact <a href="/support">Support</a> immediately.</div>
@@ -15,8 +19,8 @@
                 <div>Transaction Id: <a href="http://etherscan.io/tx/{{txid}}" target="_blank">{{txid}}</a></div>
             </div>
             <div class="col-md-4">
-                <a href="https://one2crypto.com/guides/add-custom-token-metamask/">Make sure you add the CWBY token address in Metamask!</p>
-                <p><strong>0x52876c1c7180428eff2f507886ff145e7e591bb1</strong></p>
+                <a href="https://one2crypto.com/guides/add-custom-token-metamask/">Make sure you add the CWBY token address in Metamask!</a>
+                <strong>0x52876c1c7180428eff2f507886ff145e7e591bb1</strong>
             </div>
         {% endif %}
         
