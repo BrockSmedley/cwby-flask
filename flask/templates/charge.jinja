@@ -9,9 +9,9 @@
             <div>Uh-oh. Our system encountered a rare error with your token payout. Please contact <a href="/support">Support</a> immediately.</div>
         {% else %}
             <div>We're sending your tokens to your ETH address: 
-                <a href="http://etherscan.io/address/{{address}}">{{address}}</a>
+                <a href="http://etherscan.io/address/{{address}}" target="_blank">{{address}}</a>
             </div>
-            <div>Transaction Id: <a href="http://etherscan.io/tx/{{txid}}">{{txid}}</a></div>
+            <div>Transaction Id: <a href="http://etherscan.io/tx/{{txid}}" target="_blank">{{txid}}</a></div>
         {% endif %}
         
     </div>
