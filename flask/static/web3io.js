@@ -1,7 +1,8 @@
 const w3utils = require('web3-utils');
 
 //const CONTRACT_ADDRESS = "0x492934308E98b590A626666B703A6dDf2120e85e"; // cdev
-const CONTRACT_ADDRESS = "0x3041EfE098e2cde8420DD16c9fBF5bde630f6168"; // kovan
+//const CONTRACT_ADDRESS = "0x3041EfE098e2cde8420DD16c9fBF5bde630f6168"; // kovan
+const CONTRACT_ADDRESS = "0x52876c1c7180428eff2f507886ff145e7e591bb1" // mainnet
 // "0x731a10897d267e19B34503aD902d0A29173Ba4B1"; // OG CWBY
 
 const startApp = function (web3) {

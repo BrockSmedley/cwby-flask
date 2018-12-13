@@ -12,21 +12,22 @@ from solc import compile_source
 from web3.contract import ConciseContract
 
 
-# TEST API ACCOUNT INFO
-# Private key: a5fd26e449e7068059d4e139465205963d3355ee2a9f45d9e7d4635b4524cda3
-# Public key:  a074c22e55610001e52b567f887dddd62b1874981a46d6cf1db0e7f2fba00a91a62576bd96fab6e558a1a05b114d06e92996f14bcf244d3232ffd297fa951856
-# Address:     0x85D519832Eee2ea676419F896B6E0A1e83a28CEA
-
-# infura kovan endpoint
-HTTP_ENDPOINT = 'https://kovan.infura.io/v3/1da93ca6751b45cdac2af62a4e5b464c'
-WSS_ENDPOINT = 'wss://kovan.infura.io/ws/v3/1da93ca6751b45cdac2af62a4e5b464c'
+# infura endpoints
+_eth_kovan = 'https://kovan.infura.io/v3/1da93ca6751b45cdac2af62a4e5b464c'
+_wss_kovan = 'wss://kovan.infura.io/ws/v3/1da93ca6751b45cdac2af62a4e5b464c'
+_eth_mainnet = 'https://mainnet.infura.io/v3/1da93ca6751b45cdac2af62a4e5b464c'
+_wss_mainnet = 'wss://mainnet.infura.io/ws/v3/1da93ca6751b45cdac2af62a4e5b464c'
+HTTP_ENDPOINT = _eth_mainnet
+WSS_ENDPOINT = _wss_mainnet
 
 # token address; must be already deployed
 # CONTRACT_ADDRESS = '0x492934308E98b590A626666B703A6dDf2120e85e' # local
-CONTRACT_ADDRESS = '0x3041EfE098e2cde8420DD16c9fBF5bde630f6168'  # kovan
-# '0x731a10897d267e19B34503aD902d0A29173Ba4B1'
+# '0x731a10897d267e19B34503aD902d0A29173Ba4B1' # OG dev
+# CONTRACT_ADDRESS = '0x3041EfE098e2cde8420DD16c9fBF5bde630f6168'  # kovan
+CONTRACT_ADDRESS = '0x52876c1c7180428eff2f507886ff145e7e591bb1'  # mainnet
 
-# address of API (this thing)
+
+# address of API wallet (controlled in-code using private key, and by Brock from Metamask)
 API_ADDRESS = '0x85D519832Eee2ea676419F896B6E0A1e83a28CEA'
 API_ADDRESS = Web3.toChecksumAddress(API_ADDRESS.lower())
 
