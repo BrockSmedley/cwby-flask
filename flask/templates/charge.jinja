@@ -8,10 +8,16 @@
         {% if txid == 'none' %}
             <div>Uh-oh. Our system encountered a rare error with your token payout. Please contact <a href="/support">Support</a> immediately.</div>
         {% else %}
-            <div>We're sending your tokens to your ETH address: 
-                <a href="http://etherscan.io/address/{{address}}" target="_blank">{{address}}</a>
+            <div class="col-md-8">
+                <div>We're sending your tokens to your ETH address: 
+                    <a href="http://etherscan.io/address/{{address}}" target="_blank">{{address}}</a>
+                </div>
+                <div>Transaction Id: <a href="http://etherscan.io/tx/{{txid}}" target="_blank">{{txid}}</a></div>
             </div>
-            <div>Transaction Id: <a href="http://etherscan.io/tx/{{txid}}" target="_blank">{{txid}}</a></div>
+            <div class="col-md-4">
+                <a href="https://one2crypto.com/guides/add-custom-token-metamask/">Make sure you add the CWBY token address in Metamask!</p>
+                <p><strong>0x52876c1c7180428eff2f507886ff145e7e591bb1</strong></p>
+            </div>
         {% endif %}
         
     </div>
