@@ -371,7 +371,7 @@ const getAbi = function () {
 }
 
 const getPrice = function () {
-    return 420;
+    return 69; //cents
 };
 
 const getContractAddress = function () {
