@@ -1,6 +1,6 @@
 FROM alpine:3.8
 EXPOSE 5000
-RUN apk add --no-cache uwsgi-python3 python3 pkgconfig libffi gcc python3-dev musl-dev
+RUN apk add --no-cache uwsgi-python3 python3 pkgconfig libffi-dev gcc python3-dev musl-dev openssl-dev
 
 RUN mkdir -p /src/app/
 WORKDIR /src/app

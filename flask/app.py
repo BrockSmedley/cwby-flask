@@ -399,6 +399,9 @@ def js(path):
 def support():
     return render_template('support.jinja', supportEmail=SUPPORT_EMAIL)
 
+@app.route('/.well-known/acme-challenge/<filename>')
+def acme(filename):
+    return send_from_directory('static/.well-known/acme-challenge', filename)
 
 # RUN THAT  ===================================================================
 if __name__ == '__main__':
