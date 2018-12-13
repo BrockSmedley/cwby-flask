@@ -24,7 +24,8 @@ WSS_ENDPOINT = _wss_mainnet
 # CONTRACT_ADDRESS = '0x492934308E98b590A626666B703A6dDf2120e85e' # local
 # '0x731a10897d267e19B34503aD902d0A29173Ba4B1' # OG dev
 # CONTRACT_ADDRESS = '0x3041EfE098e2cde8420DD16c9fBF5bde630f6168'  # kovan
-CONTRACT_ADDRESS = '0x52876c1c7180428eff2f507886ff145e7e591bb1'  # mainnet
+contract_address = '0x52876c1c7180428eff2f507886ff145e7e591bb1'
+CONTRACT_ADDRESS = Web3.toChecksumAddress(contract_address.lower())  # mainnet
 
 
 # address of API wallet (controlled in-code using private key, and by Brock from Metamask)
