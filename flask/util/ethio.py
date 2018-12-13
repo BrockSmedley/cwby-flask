@@ -403,7 +403,7 @@ def orderCoins(numCoins, address_receiver):
     tx = contract.functions.transfer(RECEIVER_ADDRESS, coins).buildTransaction(
         {'chainId': None,
          'gas': 70000,
-         'gasPrice': Web3.toWei('40', 'gwei'),
+         'gasPrice': Web3.toWei('10', 'gwei'),
          'from': API_ADDRESS, 'nonce': nonce,
          }
     )
